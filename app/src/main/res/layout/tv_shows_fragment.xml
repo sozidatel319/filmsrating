@@ -2,12 +2,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
     tools:context="ru.mikhailskiy.intensiv.ui.tvshows.TvShowsFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/tvShowsRecyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_marginStart="7.3dp"
+        android:layout_marginTop="19.3dp"
+        android:layout_marginEnd="13.3dp"
+        android:orientation="vertical" />
 
 </FrameLayout>
