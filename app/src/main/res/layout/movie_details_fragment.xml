@@ -11,7 +11,11 @@
         android:id="@+id/filmPosterFrameLayout"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dimens_213.3">
-
+        <ImageView
+            android:id="@+id/filmPosterImageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/film_poster" />
         <include
             layout="@layout/toolbar"
             android:layout_width="match_parent"
@@ -27,6 +31,7 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/titleFilmTextView"
             style="@style/filmNameText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -64,6 +69,7 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/aboutFilmTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dimens_20"

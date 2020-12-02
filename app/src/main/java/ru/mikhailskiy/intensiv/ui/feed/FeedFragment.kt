@@ -15,8 +15,8 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import ru.mikhailskiy.intensiv.BuildConfig
+import ru.mikhailskiy.intensiv.Constants
 import ru.mikhailskiy.intensiv.R
-import ru.mikhailskiy.intensiv.data.MockRepository
 import ru.mikhailskiy.intensiv.data.Movie
 import ru.mikhailskiy.intensiv.data.MoviesResponse
 import ru.mikhailskiy.intensiv.network.MovieApiClient
@@ -87,7 +87,7 @@ class FeedFragment : Fragment() {
 
         })
 
-       val getPopularMovies = MovieApiClient.apiClient.getPopularMovies(API_KEY, "ru")
+        val getPopularMovies = MovieApiClient.apiClient.getPopularMovies(API_KEY, "ru")
         getPopularMovies.enqueue(object : Callback<MoviesResponse> {
             override fun onResponse(
                 call: Call<MoviesResponse>,
@@ -97,11 +97,11 @@ class FeedFragment : Fragment() {
                     MainCardContainer(
                         R.string.recommended,
                         response.body()!!.results
-                        .map {
-                            MovieItem(it) { movie ->
-                                openMovieDetails(movie)
-                            }
-                        }.toList()
+                            .map {
+                                MovieItem(it) { movie ->
+                                    openMovieDetails(movie)
+                                }
+                            }.toList()
                     )
                 )
 
@@ -129,7 +129,9 @@ class FeedFragment : Fragment() {
         }
 
         val bundle = Bundle()
-        bundle.putString("title", movie.title)
+        bundle.putString(Constants.TITLE_FILM, movie.title)
+        bundle.putString(Constants.ABOUT_FILM, movie.overview)
+        bundle.putString(Constants.FILM_POSTER, movie.backDropPath)
         findNavController().navigate(R.id.movie_details_fragment, bundle, options)
     }
 
