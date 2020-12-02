@@ -30,6 +30,7 @@ class FeedFragment : Fragment() {
     }
     private var upcomingMoviesList: List<MainCardContainer>? = null
     private var popularMoviesList: List<MainCardContainer>? = null
+    private var nowPlayingMoviesList: List<MainCardContainer>? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,11 +45,9 @@ class FeedFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Добавляем recyclerView
-        upcoming_movies_recycler_view.layoutManager = LinearLayoutManager(context)
         upcoming_movies_recycler_view.adapter = adapter.apply { addAll(listOf()) }
-
-        popular_movies_recycler_view.layoutManager = LinearLayoutManager(context)
         popular_movies_recycler_view.adapter = adapter.apply { addAll(listOf()) }
+        playing_now_movies_recycler_view.adapter = adapter.apply { addAll(listOf()) }
 
         search_toolbar.search_edit_text.afterTextChanged {
             Timber.d(it.toString())
@@ -112,8 +111,34 @@ class FeedFragment : Fragment() {
                 Timber.d(t.toString())
             }
         })
-        // Используя Мок-репозиторий получаем фэйковый список фильмов
-        // Чтобы отобразить второй ряд фильмов
+
+        val getNowPlayingMovies = MovieApiClient.apiClient.getNowPlayingMovies(API_KEY, "ru")
+        getNowPlayingMovies.enqueue(object : Callback<MoviesResponse> {
+            override fun onResponse(
+                call: Call<MoviesResponse>,
+                response: Response<MoviesResponse>
+            ) {
+                nowPlayingMoviesList = listOf(
+                    MainCardContainer(
+                        R.string.now_playing,
+                        response.body()!!.results
+                            .map {
+                                MovieItem(it) { movie ->
+                                    openMovieDetails(movie)
+                                }
+                            }.toList()
+                    )
+                )
+
+                playing_now_movies_recycler_view.adapter =
+                    adapter.apply { addAll(nowPlayingMoviesList!!) }
+            }
+
+            override fun onFailure(call: Call<MoviesResponse>, t: Throwable) {
+                Timber.d(t.toString())
+            }
+
+        })
 
 
     }

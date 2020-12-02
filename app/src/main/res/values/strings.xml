@@ -4,6 +4,7 @@
     <string name="search_hint">Введите название</string>
 
     <string name="main_title">Что будете смотреть\nсегодня?</string>
+    <string name="now_playing">Сейчас в прокате</string>
     <string name="recommended">Рекомендуем</string>
     <string name="popular">Популярные</string>
     <string name="upcoming">Новинки</string>
