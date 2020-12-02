@@ -26,7 +26,7 @@ interface MovieApiInterface{
     @GET("movie/get-movie-credits")
     fun getMovieCredits(@Query("api_key")apiKey:String, @Query("language")language:String): Call<MoviesResponse>
 
-    @GET("tv/get-popular-tv-shows")
+    @GET("tv/popular")
     fun getPopularTvShows(@Query("api_key")apiKey:String, @Query("language")language:String): Call<MoviesResponse>
 
 }

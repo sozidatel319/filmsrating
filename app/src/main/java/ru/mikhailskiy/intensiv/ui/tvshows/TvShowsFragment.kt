@@ -7,13 +7,21 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
+import kotlinx.android.synthetic.main.tv_shows_fragment.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import ru.mikhailskiy.intensiv.Constants
 import ru.mikhailskiy.intensiv.R
-import ru.mikhailskiy.intensiv.data.MockRepository
 import ru.mikhailskiy.intensiv.data.Movie
+import ru.mikhailskiy.intensiv.data.MoviesResponse
+import ru.mikhailskiy.intensiv.network.MovieApiClient
+import ru.mikhailskiy.intensiv.ui.feed.FeedFragment
+import ru.mikhailskiy.intensiv.ui.feed.MainCardContainer
+import ru.mikhailskiy.intensiv.ui.feed.MovieItem
+import timber.log.Timber
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -23,7 +31,10 @@ class TvShowsFragment : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
 
-    private lateinit var tvShowsRecyclerView: RecyclerView
+    private val adapter by lazy {
+        GroupAdapter<GroupieViewHolder>()
+    }
+    private var nowPlayingMoviesList: List<MainCardContainer>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,23 +54,39 @@ class TvShowsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        tvShowsRecyclerview.adapter = adapter.apply { addAll(listOf()) }
 
-        tvShowsRecyclerView = requireView().findViewById(R.id.tvShowsRecyclerview)
-        tvShowsRecyclerView.apply {
-            layoutManager = LinearLayoutManager(context)
-            adapter = GroupAdapter<GroupieViewHolder>().apply {
-                addAll(MockRepository.getMovies().map {
-                    TvShowItem(it) { movie ->
-                        openMovieDetails(
-                            movie
-                        )
-                    }
-                })
+        val getPopularTvShows =
+            MovieApiClient.apiClient.getPopularTvShows(FeedFragment.API_KEY, "ru")
+        getPopularTvShows.enqueue(object : Callback<MoviesResponse> {
+            override fun onResponse(
+                call: Call<MoviesResponse>,
+                response: Response<MoviesResponse>
+            ) {
+                nowPlayingMoviesList = listOf(
+                    MainCardContainer(
+                        R.string.upcoming,
+                        response.body()!!.results
+                            .map {
+                                MovieItem(it) { movie ->
+                                    openMovieDetails(
+                                        movie
+                                    )
+                                }
+                            }.toList()
+                    )
+                )
+                tvShowsRecyclerview.adapter =
+                    adapter.apply { addAll(nowPlayingMoviesList!!) }
             }
-        }
+
+            override fun onFailure(call: Call<MoviesResponse>, t: Throwable) {
+                Timber.d(t.toString())
+            }
+        })
     }
 
-    private fun openMovieDetails(movie: Movie) {
+    fun openMovieDetails(movie: Movie) {
         val options = navOptions {
             anim {
                 enter = R.anim.slide_in_right
@@ -70,18 +97,8 @@ class TvShowsFragment : Fragment() {
         }
 
         val bundle = Bundle()
-        bundle.putString("title", movie.title)
+        bundle.putString("title", movie.originalTitle)
+        bundle.putString(Constants.FILM_POSTER,movie.backDropPath)
         findNavController().navigate(R.id.movie_details_fragment, bundle, options)
-    }
-
-    companion object {
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            TvShowsFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
     }
 }
