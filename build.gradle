@@ -47,4 +47,7 @@ ext {
 
     groupieVersion ='2.8.0'
     retrofitVersion = '2.9.0'
+    okHttp3LoggingInterseptorVersion = '4.9.0'
+    rxJava2Version = '2.2.19'
+    rxAndroidVersion = '2.1.1'
 }
