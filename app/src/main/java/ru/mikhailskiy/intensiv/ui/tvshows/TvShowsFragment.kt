@@ -56,7 +56,7 @@ class TvShowsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         tvShowsRecyclerview.adapter = adapter.apply { addAll(listOf()) }
 
-        val getPopularTvShows =
+       /* val getPopularTvShows =
             MovieApiClient.apiClient.getPopularTvShows(FeedFragment.API_KEY, "ru")
         getPopularTvShows.enqueue(object : Callback<MoviesResponse> {
             override fun onResponse(
@@ -83,7 +83,7 @@ class TvShowsFragment : Fragment() {
             override fun onFailure(call: Call<MoviesResponse>, t: Throwable) {
                 Timber.d(t.toString())
             }
-        })
+        })*/
     }
 
     fun openMovieDetails(movie: Movie) {

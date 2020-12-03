@@ -18,6 +18,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField 'String', 'THE_MOVIE_DATABASE_API', keystoreProperties['THE_MOVIE_DATABASE_API']
+        buildConfigField "String", "BASE_URL", "\"https://api.themoviedb.org/3/\""
     }
     buildTypes {
         release {
@@ -68,12 +69,17 @@ dependencies {
     //Retrofit
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
-    implementation "com.squareup.okhttp3:logging-interceptor:4.7.2"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okHttp3LoggingInterseptorVersion"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
 
 
     // Picasso
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'jp.wasabeef:picasso-transformations:2.2.1'
+
+    //RxJava2
+    implementation "io.reactivex.rxjava2:rxjava:$rxJava2Version"
+    implementation "io.reactivex.rxjava2:rxandroid:$rxAndroidVersion"
 
     implementation "androidx.recyclerview:recyclerview:$rootProject.recyclerViewVersion"
     implementation 'androidx.cardview:cardview:1.0.0'

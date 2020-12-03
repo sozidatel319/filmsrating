@@ -7,17 +7,16 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers.io
 import kotlinx.android.synthetic.main.feed_fragment.*
 import kotlinx.android.synthetic.main.feed_header.*
 import kotlinx.android.synthetic.main.search_toolbar.view.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import ru.mikhailskiy.intensiv.BuildConfig
 import ru.mikhailskiy.intensiv.Constants
 import ru.mikhailskiy.intensiv.R
 import ru.mikhailskiy.intensiv.data.Movie
-import ru.mikhailskiy.intensiv.data.MoviesResponse
 import ru.mikhailskiy.intensiv.network.MovieApiClient
 import ru.mikhailskiy.intensiv.ui.afterTextChanged
 import timber.log.Timber
@@ -27,9 +26,10 @@ class FeedFragment : Fragment() {
     private val adapter by lazy {
         GroupAdapter<GroupieViewHolder>()
     }
-    private var upcomingMoviesList: List<MainCardContainer>? = null
-    private var popularMoviesList: List<MainCardContainer>? = null
-    private var nowPlayingMoviesList: List<MainCardContainer>? = null
+    private lateinit var upcomingMoviesList: List<MainCardContainer>
+    private lateinit var popularMoviesList: List<MainCardContainer>
+    private lateinit var nowPlayingMoviesList: List<MainCardContainer>
+    private val compositeDisposable = CompositeDisposable()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,10 +43,7 @@ class FeedFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Добавляем recyclerView
-        upcoming_movies_recycler_view.adapter = adapter.apply { addAll(listOf()) }
-        popular_movies_recycler_view.adapter = adapter.apply { addAll(listOf()) }
-        playing_now_movies_recycler_view.adapter = adapter.apply { addAll(listOf()) }
+        movies_recycler_view.adapter = adapter.apply { addAll(listOf()) }
 
         search_toolbar.search_edit_text.afterTextChanged {
             Timber.d(it.toString())
@@ -56,91 +53,54 @@ class FeedFragment : Fragment() {
         }
 
         // Используя Мок-репозиторий получаем фэйковый список фильмов
-        val getUpcomingMovies = MovieApiClient.apiClient.getUpcomingMovies(API_KEY, "ru")
-        getUpcomingMovies.enqueue(object : Callback<MoviesResponse> {
-            override fun onResponse(
-                call: Call<MoviesResponse>,
-                response: Response<MoviesResponse>
-            ) {
-                upcomingMoviesList = listOf(
-                    MainCardContainer(
-                        R.string.upcoming,
-                        response.body()!!.results
-                            .map {
-                                MovieItem(it) { movie ->
-                                    openMovieDetails(
-                                        movie
-                                    )
-                                }
-                            }.toList()
-                    )
-                )
-                upcoming_movies_recycler_view.adapter =
-                    adapter.apply { addAll(upcomingMoviesList!!) }
-            }
+        val getUpcomingMovies =
+            MovieApiClient.apiClient.getUpcomingMovies("","ru")
+                .map { it.results }
+                .subscribeOn(io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ response ->
+                    upcomingMoviesList = listOfMovies(R.string.upcoming, response)
+                    movies_recycler_view.adapter =
+                        adapter.apply {
+                            addAll(upcomingMoviesList)
+                        }
+                }, {
+                    Timber.e(it)
+                })
 
-            override fun onFailure(call: Call<MoviesResponse>, t: Throwable) {
-                Timber.d(t.toString())
-            }
+        compositeDisposable.add(getUpcomingMovies)
 
-        })
+        val getPopularMovies =
+            MovieApiClient.apiClient.getPopularMovies(API_KEY, "ru")
+                .map { it.results }
+                .subscribeOn(io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ response ->
+                    popularMoviesList = listOfMovies(R.string.popular, response)
 
-        val getPopularMovies = MovieApiClient.apiClient.getPopularMovies(API_KEY, "ru")
-        getPopularMovies.enqueue(object : Callback<MoviesResponse> {
-            override fun onResponse(
-                call: Call<MoviesResponse>,
-                response: Response<MoviesResponse>
-            ) {
-                popularMoviesList = listOf(
-                    MainCardContainer(
-                        R.string.recommended,
-                        response.body()!!.results
-                            .map {
-                                MovieItem(it) { movie ->
-                                    openMovieDetails(movie)
-                                }
-                            }.toList()
-                    )
-                )
+                    movies_recycler_view.adapter =
+                        adapter.apply { addAll(popularMoviesList) }
+                }, {
+                    Timber.e(it)
+                })
+        compositeDisposable.add(getPopularMovies)
 
-                popular_movies_recycler_view.adapter = adapter.apply { addAll(popularMoviesList!!) }
-            }
-
-            override fun onFailure(call: Call<MoviesResponse>, t: Throwable) {
-                Timber.d(t.toString())
-            }
-        })
-
-        val getNowPlayingMovies = MovieApiClient.apiClient.getNowPlayingMovies(API_KEY, "ru")
-        getNowPlayingMovies.enqueue(object : Callback<MoviesResponse> {
-            override fun onResponse(
-                call: Call<MoviesResponse>,
-                response: Response<MoviesResponse>
-            ) {
-                nowPlayingMoviesList = listOf(
-                    MainCardContainer(
-                        R.string.now_playing,
-                        response.body()!!.results
-                            .map {
-                                MovieItem(it) { movie ->
-                                    openMovieDetails(movie)
-                                }
-                            }.toList()
-                    )
-                )
-
-                playing_now_movies_recycler_view.adapter =
-                    adapter.apply { addAll(nowPlayingMoviesList!!) }
-            }
-
-            override fun onFailure(call: Call<MoviesResponse>, t: Throwable) {
-                Timber.d(t.toString())
-            }
-
-        })
-
-
+        val getNowPlayingMovies =
+            MovieApiClient.apiClient.getNowPlayingMovies(API_KEY, "ru")
+                .map { it.results }
+                .subscribeOn(io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ response ->
+                    nowPlayingMoviesList = listOfMovies(R.string.now_playing, response)
+                    movies_recycler_view.adapter =
+                        adapter.apply { addAll(nowPlayingMoviesList) }
+                },
+                    {
+                        Timber.e(it)
+                    })
+        compositeDisposable.add(getNowPlayingMovies)
     }
+
 
     private fun openMovieDetails(movie: Movie) {
         val options = navOptions {
@@ -172,6 +132,20 @@ class FeedFragment : Fragment() {
         val bundle = Bundle()
         bundle.putString("search", searchText)
         findNavController().navigate(R.id.search_dest, bundle, options)
+    }
+
+    private fun listOfMovies(description: Int, listMovies: List<Movie>): List<MainCardContainer> {
+        return listOf(
+            MainCardContainer(
+                description,
+                listMovies
+                    .map {
+                        MovieItem(it) { movie ->
+                            openMovieDetails(movie)
+                        }
+                    }.toList()
+            )
+        )
     }
 
     override fun onStop() {

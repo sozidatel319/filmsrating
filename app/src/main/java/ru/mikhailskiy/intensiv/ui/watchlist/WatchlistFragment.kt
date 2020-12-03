@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
-import kotlinx.android.synthetic.main.fragment_watchlist.upcoming_movies_recycler_view
+import kotlinx.android.synthetic.main.fragment_watchlist.movies_recycler_view
 import ru.mikhailskiy.intensiv.R
 import ru.mikhailskiy.intensiv.data.MockRepository
 
@@ -43,8 +43,8 @@ class WatchlistFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        upcoming_movies_recycler_view.layoutManager = GridLayoutManager(context, 4)
-        upcoming_movies_recycler_view.adapter = adapter.apply { addAll(listOf()) }
+        movies_recycler_view.layoutManager = GridLayoutManager(context, 4)
+        movies_recycler_view.adapter = adapter.apply { addAll(listOf()) }
 
         val moviesList =
             MockRepository.getMovies().map {
@@ -53,7 +53,7 @@ class WatchlistFragment : Fragment() {
                 ) { movie -> }
             }.toList()
 
-        upcoming_movies_recycler_view.adapter = adapter.apply { addAll(moviesList) }
+        movies_recycler_view.adapter = adapter.apply { addAll(moviesList) }
     }
 
     companion object {
