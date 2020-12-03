@@ -15,13 +15,13 @@ class TvShowItem (
 
         override fun bind(viewHolder: GroupieViewHolder, position: Int) {
             viewHolder.tvShowNameTextView.text = content.title
-            val rating = content.rating
+            //val rating = content.rating
             /*for (x in 1..5){
                 val name = "star$x"
             }*/
-            when(content.rating){
+           /* when(content.rating){
 
-            }/*.setOnClickListener {
+            }*//*.setOnClickListener {
                 onClick.invoke(content)
             }*/
         }

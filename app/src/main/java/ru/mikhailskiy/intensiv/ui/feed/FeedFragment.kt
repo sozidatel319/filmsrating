@@ -5,16 +5,19 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers.io
 import kotlinx.android.synthetic.main.feed_fragment.*
 import kotlinx.android.synthetic.main.feed_header.*
 import kotlinx.android.synthetic.main.search_toolbar.view.*
 import ru.mikhailskiy.intensiv.BuildConfig
+import ru.mikhailskiy.intensiv.Constants
 import ru.mikhailskiy.intensiv.R
-import ru.mikhailskiy.intensiv.data.MockRepository
 import ru.mikhailskiy.intensiv.data.Movie
+import ru.mikhailskiy.intensiv.network.MovieApiClient
 import ru.mikhailskiy.intensiv.ui.afterTextChanged
 import timber.log.Timber
 
@@ -23,6 +26,10 @@ class FeedFragment : Fragment() {
     private val adapter by lazy {
         GroupAdapter<GroupieViewHolder>()
     }
+    private lateinit var upcomingMoviesList: List<MainCardContainer>
+    private lateinit var popularMoviesList: List<MainCardContainer>
+    private lateinit var nowPlayingMoviesList: List<MainCardContainer>
+    private val compositeDisposable = CompositeDisposable()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,8 +43,6 @@ class FeedFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Добавляем recyclerView
-        movies_recycler_view.layoutManager = LinearLayoutManager(context)
         movies_recycler_view.adapter = adapter.apply { addAll(listOf()) }
 
         search_toolbar.search_edit_text.afterTextChanged {
@@ -48,37 +53,54 @@ class FeedFragment : Fragment() {
         }
 
         // Используя Мок-репозиторий получаем фэйковый список фильмов
-        val moviesList = listOf(
-            MainCardContainer(
-                R.string.recommended,
-                MockRepository.getMovies().map {
-                    MovieItem(it) { movie ->
-                        openMovieDetails(
-                            movie
-                        )
-                    }
-                }.toList()
-            )
-        )
+        val getUpcomingMovies =
+            MovieApiClient.apiClient.getUpcomingMovies()
+                .map { it.results }
+                .subscribeOn(io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ response ->
+                    upcomingMoviesList = listOfMovies(R.string.upcoming, response)
+                    movies_recycler_view.adapter =
+                        adapter.apply {
+                            addAll(upcomingMoviesList)
+                        }
+                }, {
+                    Timber.e(it)
+                })
 
-        movies_recycler_view.adapter = adapter.apply { addAll(moviesList) }
+        compositeDisposable.add(getUpcomingMovies)
 
-        // Используя Мок-репозиторий получаем фэйковый список фильмов
-        // Чтобы отобразить второй ряд фильмов
-        val newMoviesList = listOf(
-            MainCardContainer(
-                R.string.upcoming,
-                MockRepository.getMovies().map {
-                    MovieItem(it) { movie ->
-                        openMovieDetails(movie)
-                    }
-                }.toList()
-            )
-        )
+        val getPopularMovies =
+            MovieApiClient.apiClient.getPopularMovies()
+                .map { it.results }
+                .subscribeOn(io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ response ->
+                    popularMoviesList = listOfMovies(R.string.popular, response)
 
-        adapter.apply { addAll(newMoviesList) }
+                    movies_recycler_view.adapter =
+                        adapter.apply { addAll(popularMoviesList) }
+                }, {
+                    Timber.e(it)
+                })
+        compositeDisposable.add(getPopularMovies)
 
+        val getNowPlayingMovies =
+            MovieApiClient.apiClient.getNowPlayingMovies()
+                .map { it.results }
+                .subscribeOn(io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ response ->
+                    nowPlayingMoviesList = listOfMovies(R.string.now_playing, response)
+                    movies_recycler_view.adapter =
+                        adapter.apply { addAll(nowPlayingMoviesList) }
+                },
+                    {
+                        Timber.e(it)
+                    })
+        compositeDisposable.add(getNowPlayingMovies)
     }
+
 
     private fun openMovieDetails(movie: Movie) {
         val options = navOptions {
@@ -91,7 +113,9 @@ class FeedFragment : Fragment() {
         }
 
         val bundle = Bundle()
-        bundle.putString("title", movie.title)
+        bundle.putString(Constants.TITLE, movie.title)
+        bundle.putString(Constants.ABOUT_FILM, movie.overview)
+        bundle.putString(Constants.FILM_POSTER, movie.fullBackDropPath)
         findNavController().navigate(R.id.movie_details_fragment, bundle, options)
     }
 
@@ -108,6 +132,20 @@ class FeedFragment : Fragment() {
         val bundle = Bundle()
         bundle.putString("search", searchText)
         findNavController().navigate(R.id.search_dest, bundle, options)
+    }
+
+    private fun listOfMovies(description: Int, listMovies: List<Movie>): List<MainCardContainer> {
+        return listOf(
+            MainCardContainer(
+                description,
+                listMovies
+                    .map {
+                        MovieItem(it) { movie ->
+                            openMovieDetails(movie)
+                        }
+                    }.toList()
+            )
+        )
     }
 
     override fun onStop() {

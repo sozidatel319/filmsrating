@@ -1,13 +1,152 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/blueDark"
+    android:orientation="vertical"
     tools:context="ru.mikhailskiy.intensiv.ui.movie_details.MovieDetailsFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <FrameLayout
+        android:id="@+id/filmPosterFrameLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="@dimen/dimens_213.3">
+        <ImageView
+            android:id="@+id/filmPosterImageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/film_poster" />
+        <include
+            layout="@layout/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimens_33.3" />
+    </FrameLayout>
 
-</FrameLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dimens_20"
+        android:layout_marginEnd="@dimen/dimens_19.2"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/titleFilmTextView"
+            style="@style/filmNameText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:drawableEndCompat="@drawable/ic_4k_fullhd"
+            tools:text="Aquaman" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimens_10"
+            android:orientation="horizontal">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/dimens_20"
+                android:background="@drawable/button_shape"
+                android:text="@string/watch"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="@dimen/dimens_7.3sp"
+                android:textStyle="bold" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <RatingBar
+                style="?android:attr/ratingBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/dimens_20"
+                android:isIndicator="false"
+                android:numStars="5" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/aboutFilmTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimens_20"
+            style="@style/aboutAnyText"
+            tools:text="In 1985 Marine" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimens_10"
+            android:layout_marginBottom="@dimen/dimens_10"
+            android:orientation="horizontal" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/dimens_3.3"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/aboutFilmTitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/dimens_10"
+                android:text="@string/studio" />
+            <TextView
+                android:id="@+id/studioTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/aboutAnyText"
+                tools:text="Warner Bros"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/dimens_3.3"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/aboutFilmTitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/dimens_10"
+                android:text="@string/genre" />
+            <TextView
+                android:id="@+id/genreFilmTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/aboutAnyText"
+                tools:text="Warner Bros"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/aboutFilmTitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/dimens_10"
+                android:text="@string/year_of_film" />
+            <TextView
+                android:id="@+id/yearOfFilmTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/aboutAnyText"
+                tools:text="Warner Bros"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
