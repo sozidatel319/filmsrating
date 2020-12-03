@@ -54,7 +54,7 @@ class FeedFragment : Fragment() {
 
         // Используя Мок-репозиторий получаем фэйковый список фильмов
         val getUpcomingMovies =
-            MovieApiClient.apiClient.getUpcomingMovies("","ru")
+            MovieApiClient.apiClient.getUpcomingMovies()
                 .map { it.results }
                 .subscribeOn(io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -71,7 +71,7 @@ class FeedFragment : Fragment() {
         compositeDisposable.add(getUpcomingMovies)
 
         val getPopularMovies =
-            MovieApiClient.apiClient.getPopularMovies(API_KEY, "ru")
+            MovieApiClient.apiClient.getPopularMovies()
                 .map { it.results }
                 .subscribeOn(io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -86,7 +86,7 @@ class FeedFragment : Fragment() {
         compositeDisposable.add(getPopularMovies)
 
         val getNowPlayingMovies =
-            MovieApiClient.apiClient.getNowPlayingMovies(API_KEY, "ru")
+            MovieApiClient.apiClient.getNowPlayingMovies()
                 .map { it.results }
                 .subscribeOn(io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -113,9 +113,9 @@ class FeedFragment : Fragment() {
         }
 
         val bundle = Bundle()
-        bundle.putString(Constants.TITLE_FILM, movie.title)
+        bundle.putString(Constants.TITLE, movie.title)
         bundle.putString(Constants.ABOUT_FILM, movie.overview)
-        bundle.putString(Constants.FILM_POSTER, movie.backDropPath)
+        bundle.putString(Constants.FILM_POSTER, movie.fullBackDropPath)
         findNavController().navigate(R.id.movie_details_fragment, bundle, options)
     }
 

@@ -9,14 +9,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.feed_fragment.*
 import kotlinx.android.synthetic.main.tv_shows_fragment.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import ru.mikhailskiy.intensiv.Constants
 import ru.mikhailskiy.intensiv.R
 import ru.mikhailskiy.intensiv.data.Movie
-import ru.mikhailskiy.intensiv.data.MoviesResponse
 import ru.mikhailskiy.intensiv.network.MovieApiClient
 import ru.mikhailskiy.intensiv.ui.feed.FeedFragment
 import ru.mikhailskiy.intensiv.ui.feed.MainCardContainer
@@ -34,7 +33,7 @@ class TvShowsFragment : Fragment() {
     private val adapter by lazy {
         GroupAdapter<GroupieViewHolder>()
     }
-    private var nowPlayingMoviesList: List<MainCardContainer>? = null
+    private lateinit var nowPlayingMoviesList: List<MainCardContainer>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,37 +55,36 @@ class TvShowsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         tvShowsRecyclerview.adapter = adapter.apply { addAll(listOf()) }
 
-       /* val getPopularTvShows =
+        val getPopularTvShows =
             MovieApiClient.apiClient.getPopularTvShows(FeedFragment.API_KEY, "ru")
-        getPopularTvShows.enqueue(object : Callback<MoviesResponse> {
-            override fun onResponse(
-                call: Call<MoviesResponse>,
-                response: Response<MoviesResponse>
-            ) {
-                nowPlayingMoviesList = listOf(
-                    MainCardContainer(
-                        R.string.upcoming,
-                        response.body()!!.results
-                            .map {
-                                MovieItem(it) { movie ->
-                                    openMovieDetails(
-                                        movie
-                                    )
-                                }
-                            }.toList()
-                    )
-                )
-                tvShowsRecyclerview.adapter =
-                    adapter.apply { addAll(nowPlayingMoviesList!!) }
-            }
-
-            override fun onFailure(call: Call<MoviesResponse>, t: Throwable) {
-                Timber.d(t.toString())
-            }
-        })*/
+                .map { it.results }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ response ->
+                    nowPlayingMoviesList = listOfMovies(R.string.now_playing, response)
+                    tvShowsRecyclerview.adapter =
+                        adapter.apply { addAll(nowPlayingMoviesList) }
+                },
+                    {
+                        Timber.e(it)
+                    })
     }
 
-    fun openMovieDetails(movie: Movie) {
+    private fun listOfMovies(description: Int, listMovies: List<Movie>): List<MainCardContainer> {
+        return listOf(
+            MainCardContainer(
+                description,
+                listMovies
+                    .map {
+                        MovieItem(it) { movie ->
+                            openMovieDetails(movie)
+                        }
+                    }.toList()
+            )
+        )
+    }
+
+    private fun openMovieDetails(movie: Movie) {
         val options = navOptions {
             anim {
                 enter = R.anim.slide_in_right
@@ -97,8 +95,8 @@ class TvShowsFragment : Fragment() {
         }
 
         val bundle = Bundle()
-        bundle.putString("title", movie.originalTitle)
-        bundle.putString(Constants.FILM_POSTER,movie.backDropPath)
+        bundle.putString(Constants.TITLE, movie.originalTitle)
+        bundle.putString(Constants.FILM_POSTER, movie.fullBackDropPath)
         findNavController().navigate(R.id.movie_details_fragment, bundle, options)
     }
 }

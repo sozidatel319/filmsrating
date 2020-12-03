@@ -19,20 +19,20 @@ interface MovieApiInterface {
 
     @GET("movie/now_playing")
     fun getNowPlayingMovies(
-        @Query("api_key") apiKey: String,
-        @Query("language") language: String
+        @Query("api_key") apiKey: String = BuildConfig.THE_MOVIE_DATABASE_API,
+        @Query("language") language: String = "ru"
     ): Single<MoviesResponse>
 
     @GET("movie/upcoming")
     fun getUpcomingMovies(
         @Query("api_key") apiKey: String = BuildConfig.THE_MOVIE_DATABASE_API,
-        @Query("language") language: String
+        @Query("language") language: String = "ru"
     ): Single<MoviesResponse>
 
     @GET("movie/popular")
     fun getPopularMovies(
-        @Query("api_key") apiKey: String,
-        @Query("language") language: String
+        @Query("api_key") apiKey: String = BuildConfig.THE_MOVIE_DATABASE_API,
+        @Query("language") language: String = "ru"
     ): Single<MoviesResponse>
 
     @GET("movie/get-movie-details")
@@ -49,8 +49,8 @@ interface MovieApiInterface {
 
     @GET("tv/popular")
     fun getPopularTvShows(
-        @Query("api_key") apiKey: String,
-        @Query("language") language: String
+        @Query("api_key") apiKey: String = BuildConfig.THE_MOVIE_DATABASE_API,
+        @Query("language") language: String = "ru"
     ): Single<MoviesResponse>
 
 }

@@ -19,7 +19,7 @@ class MovieDetailsFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            titleFilm = it.getString(Constants.TITLE_FILM)
+            titleFilm = it.getString(Constants.TITLE)
             aboutFilm = it.getString(Constants.ABOUT_FILM)
             path = it.getString(Constants.FILM_POSTER)
         }
@@ -37,7 +37,7 @@ class MovieDetailsFragment : Fragment() {
         titleFilmTextView.text = titleFilm
         aboutFilmTextView.text = aboutFilm
         Picasso.get()
-            .load(Constants.HEAD_OF_PATH + path)
+            .load(path)
             .into(filmPosterImageView)
         super.onViewCreated(view, savedInstanceState)
     }

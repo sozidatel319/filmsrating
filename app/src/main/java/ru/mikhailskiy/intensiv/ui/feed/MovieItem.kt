@@ -12,8 +12,6 @@ class MovieItem(
     private val onClick: (movie: Movie) -> Unit
 ) : Item() {
 
-    private val path: String = "https://image.tmdb.org/t/p/w500/"
-
     override fun getLayout() = R.layout.item_with_text
 
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
@@ -25,7 +23,7 @@ class MovieItem(
 
         // TODO Получать из модели
         Picasso.get()
-            .load(path + content.posterPath)
+            .load(content.fullPath)
             .into(viewHolder.image_preview)
     }
 }
