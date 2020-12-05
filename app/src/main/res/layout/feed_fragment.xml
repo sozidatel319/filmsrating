@@ -6,6 +6,14 @@
 
     <include layout="@layout/feed_header" />
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="@dimen/dimens_20"
+        android:layout_height="@dimen/dimens_20"
+        android:visibility="invisible"
+        android:layout_gravity="center"
+        />
+
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"

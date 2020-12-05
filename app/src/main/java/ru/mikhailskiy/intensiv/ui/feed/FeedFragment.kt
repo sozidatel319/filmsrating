@@ -7,8 +7,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.functions.Function3
 import io.reactivex.schedulers.Schedulers.io
 import kotlinx.android.synthetic.main.feed_fragment.*
 import kotlinx.android.synthetic.main.feed_header.*
@@ -17,6 +19,8 @@ import ru.mikhailskiy.intensiv.BuildConfig
 import ru.mikhailskiy.intensiv.Constants
 import ru.mikhailskiy.intensiv.R
 import ru.mikhailskiy.intensiv.data.Movie
+import ru.mikhailskiy.intensiv.data.MovieResult
+import ru.mikhailskiy.intensiv.data.MoviesResponse
 import ru.mikhailskiy.intensiv.network.MovieApiClient
 import ru.mikhailskiy.intensiv.ui.afterTextChanged
 import timber.log.Timber
@@ -54,51 +58,48 @@ class FeedFragment : Fragment() {
 
         // Используя Мок-репозиторий получаем фэйковый список фильмов
         val getUpcomingMovies =
-            MovieApiClient.apiClient.getUpcomingMovies()
-                .map { it.results }
-                .subscribeOn(io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ response ->
-                    upcomingMoviesList = listOfMovies(R.string.upcoming, response)
-                    movies_recycler_view.adapter =
-                        adapter.apply {
-                            addAll(upcomingMoviesList)
-                        }
-                }, {
-                    Timber.e(it)
-                })
-
-        compositeDisposable.add(getUpcomingMovies)
+            MovieApiClient.apiClient
+                .getUpcomingMovies()
+                .toObservable()
 
         val getPopularMovies =
-            MovieApiClient.apiClient.getPopularMovies()
-                .map { it.results }
-                .subscribeOn(io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ response ->
-                    popularMoviesList = listOfMovies(R.string.popular, response)
-
-                    movies_recycler_view.adapter =
-                        adapter.apply { addAll(popularMoviesList) }
-                }, {
-                    Timber.e(it)
-                })
-        compositeDisposable.add(getPopularMovies)
+            MovieApiClient.apiClient
+                .getPopularMovies()
+                .toObservable()
 
         val getNowPlayingMovies =
-            MovieApiClient.apiClient.getNowPlayingMovies()
-                .map { it.results }
-                .subscribeOn(io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ response ->
-                    nowPlayingMoviesList = listOfMovies(R.string.now_playing, response)
-                    movies_recycler_view.adapter =
-                        adapter.apply { addAll(nowPlayingMoviesList) }
-                },
-                    {
-                        Timber.e(it)
-                    })
-        compositeDisposable.add(getNowPlayingMovies)
+            MovieApiClient.apiClient
+                .getNowPlayingMovies()
+                .toObservable()
+
+        val resultOfResponse = Observable
+            .zip(
+                getUpcomingMovies, getPopularMovies, getNowPlayingMovies,
+                Function3<MoviesResponse, MoviesResponse, MoviesResponse, MovieResult> { upcomingList, popularList, nowPlayingList ->
+                    MovieResult(upcomingList.results, popularList.results, nowPlayingList.results)
+                })
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(io())
+            .doOnSubscribe {
+                progressBar.visibility = View.VISIBLE
+            }
+            .doOnComplete {
+                progressBar.visibility = View.INVISIBLE
+            }
+            .subscribe({
+                upcomingMoviesList = listOfMovies(R.string.upcoming, it.upcomingMoviesList)
+                nowPlayingMoviesList = listOfMovies(R.string.now_playing, it.nowPlayingMoviesList)
+                popularMoviesList = listOfMovies(R.string.popular, it.popularMoviesList)
+                movies_recycler_view.adapter =
+                    adapter.apply {
+                        addAll(upcomingMoviesList)
+                        addAll(nowPlayingMoviesList)
+                        addAll(popularMoviesList)
+                    }
+            }, {
+                Timber.e(it)
+            })
+        compositeDisposable.add(resultOfResponse)
     }
 
 
