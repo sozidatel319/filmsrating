@@ -6,6 +6,14 @@
     android:background="@color/colorPrimary"
     tools:context="ru.mikhailskiy.intensiv.ui.tvshows.TvShowsFragment">
 
+    <ProgressBar
+        android:id="@+id/tvShowProgressBar"
+        android:layout_width="@dimen/dimens_20"
+        android:layout_height="@dimen/dimens_20"
+        android:visibility="invisible"
+        android:layout_gravity="center"
+        />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/tvShowsRecyclerview"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"

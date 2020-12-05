@@ -81,10 +81,10 @@ class FeedFragment : Fragment() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(io())
             .doOnSubscribe {
-                progressBar.visibility = View.VISIBLE
+                feedProgressBar.visibility = View.VISIBLE
             }
             .doOnComplete {
-                progressBar.visibility = View.INVISIBLE
+                feedProgressBar.visibility = View.GONE
             }
             .subscribe({
                 upcomingMoviesList = listOfMovies(R.string.upcoming, it.upcomingMoviesList)

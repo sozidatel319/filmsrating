@@ -57,9 +57,15 @@ class TvShowsFragment : Fragment() {
 
         val getPopularTvShows =
             MovieApiClient.apiClient.getPopularTvShows(FeedFragment.API_KEY, "ru")
-                .map { it.results }
+                .map { it.results}
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe {
+                    tvShowProgressBar.visibility = View.VISIBLE
+                }
+                .doFinally {
+                    tvShowProgressBar.visibility = View.GONE
+                }
                 .subscribe({ response ->
                     nowPlayingMoviesList = listOfMovies(R.string.now_playing, response)
                     tvShowsRecyclerview.adapter =
