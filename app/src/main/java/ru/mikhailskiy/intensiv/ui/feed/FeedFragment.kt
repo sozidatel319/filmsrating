@@ -11,6 +11,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.Function3
+import io.reactivex.functions.Predicate
 import io.reactivex.schedulers.Schedulers.io
 import kotlinx.android.synthetic.main.feed_fragment.*
 import kotlinx.android.synthetic.main.feed_header.*
@@ -24,6 +25,8 @@ import ru.mikhailskiy.intensiv.data.MoviesResponse
 import ru.mikhailskiy.intensiv.network.MovieApiClient
 import ru.mikhailskiy.intensiv.ui.afterTextChanged
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
+
 
 class FeedFragment : Fragment() {
 
@@ -33,6 +36,7 @@ class FeedFragment : Fragment() {
     private lateinit var upcomingMoviesList: List<MainCardContainer>
     private lateinit var popularMoviesList: List<MainCardContainer>
     private lateinit var nowPlayingMoviesList: List<MainCardContainer>
+    private lateinit var textSubject: Observable<String>
     private val compositeDisposable = CompositeDisposable()
 
     override fun onCreateView(
@@ -49,14 +53,23 @@ class FeedFragment : Fragment() {
 
         movies_recycler_view.adapter = adapter.apply { addAll(listOf()) }
 
-        search_toolbar.search_edit_text.afterTextChanged {
-            Timber.d(it.toString())
-            if (it.toString().length > 3) {
-                openSearch(it.toString())
-            }
+
+        search_toolbar.search_edit_text.afterTextChanged { it ->
+            textSubject = Observable.just(it.toString())
+            textSubject
+                .debounce(300, TimeUnit.MILLISECONDS)
+                .filter(Predicate<String> {
+                    return@Predicate it.isNotEmpty() and (it.length > 3)
+                })
+                .subscribeOn(io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    openSearch(it.trim())
+                }, {
+                    Timber.e(it)
+                })
         }
 
-        // Используя Мок-репозиторий получаем фэйковый список фильмов
         val getUpcomingMovies =
             MovieApiClient.apiClient
                 .getUpcomingMovies()
