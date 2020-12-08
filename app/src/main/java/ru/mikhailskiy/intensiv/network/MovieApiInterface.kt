@@ -53,8 +53,8 @@ interface MovieApiInterface {
 
     @GET("search/movie")
     fun searchMovie(
-        @Query("api_key")apiKey: String = BuildConfig.THE_MOVIE_DATABASE_API,
-        @Query("query")query: String
-    ):Single<MoviesResponse>
+        @Query("api_key") apiKey: String = BuildConfig.THE_MOVIE_DATABASE_API,
+        @Query("query") query: String
+    ): Single<MoviesResponse>
 
 }

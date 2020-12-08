@@ -9,14 +9,15 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.main.feed_fragment.*
+import io.reactivex.Observable.fromIterable
+import kotlinx.android.synthetic.main.feed_fragment.movies_recycler_view
 import kotlinx.android.synthetic.main.feed_header.*
+import kotlinx.android.synthetic.main.fragment_search.*
 import ru.mikhailskiy.intensiv.Constants
 import ru.mikhailskiy.intensiv.R
 import ru.mikhailskiy.intensiv.data.Movie
 import ru.mikhailskiy.intensiv.network.MovieApiClient
+import ru.mikhailskiy.intensiv.subscribeOnIoAndObserveOnMainThread
 import ru.mikhailskiy.intensiv.ui.feed.MainCardContainer
 import ru.mikhailskiy.intensiv.ui.feed.MovieItem
 import timber.log.Timber
@@ -44,29 +45,40 @@ class SearchFragment : Fragment() {
         val searchTerm = requireArguments().getString("search")
         search_toolbar.setText(searchTerm)
         movies_recycler_view.adapter = adapter.apply { addAll(listOf()) }
-        searchTerm?.let {
+        searchTerm?.let { it ->
             MovieApiClient.apiClient.searchMovie(query = it)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .toObservable()
+                .subscribeOnIoAndObserveOnMainThread()
+                .flatMap { moviesList -> fromIterable(moviesList.results) }
+                .map { movie -> MovieItem(movie) { item -> openMovieDetails(item) } }.toList()
+                .doOnSubscribe {
+                    progressBarVisibility(true)
+                }
+                .doOnTerminate {
+                    progressBarVisibility(false)
+                }
                 .subscribe({
                     filmsFoundedList = listOf(
                         MainCardContainer(
                             R.string.recommended,
-                            it.results
-                                .map {
-                                    MovieItem(it) { movie ->
-                                        openMovieDetails(movie)
-                                    }
-                                }.toList()
+                            it
                         )
                     )
                     movies_recycler_view.adapter =
                         adapter.apply {
                             addAll(filmsFoundedList)
                         }
-                }, {
-                    Timber.e(it)
+                }, { error ->
+                    Timber.e(error)
                 })
+        }
+    }
+
+    private fun progressBarVisibility(visible: Boolean) {
+        searchProgressBar.visibility = if (visible) {
+            View.VISIBLE
+        } else {
+            View.GONE
         }
     }
 

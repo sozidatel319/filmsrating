@@ -8,14 +8,10 @@ import androidx.navigation.navOptions
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.Function3
-import io.reactivex.functions.Predicate
-import io.reactivex.schedulers.Schedulers.io
 import kotlinx.android.synthetic.main.feed_fragment.*
 import kotlinx.android.synthetic.main.feed_header.*
-import kotlinx.android.synthetic.main.search_toolbar.view.*
 import ru.mikhailskiy.intensiv.BuildConfig
 import ru.mikhailskiy.intensiv.Constants
 import ru.mikhailskiy.intensiv.R
@@ -23,9 +19,8 @@ import ru.mikhailskiy.intensiv.data.Movie
 import ru.mikhailskiy.intensiv.data.MovieResult
 import ru.mikhailskiy.intensiv.data.MoviesResponse
 import ru.mikhailskiy.intensiv.network.MovieApiClient
-import ru.mikhailskiy.intensiv.ui.afterTextChanged
+import ru.mikhailskiy.intensiv.subscribeOnIoAndObserveOnMainThread
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 
 
 class FeedFragment : Fragment() {
@@ -36,7 +31,6 @@ class FeedFragment : Fragment() {
     private lateinit var upcomingMoviesList: List<MainCardContainer>
     private lateinit var popularMoviesList: List<MainCardContainer>
     private lateinit var nowPlayingMoviesList: List<MainCardContainer>
-    private lateinit var textSubject: Observable<String>
     private val compositeDisposable = CompositeDisposable()
 
     override fun onCreateView(
@@ -53,22 +47,11 @@ class FeedFragment : Fragment() {
 
         movies_recycler_view.adapter = adapter.apply { addAll(listOf()) }
 
-
-        search_toolbar.search_edit_text.afterTextChanged { it ->
-            textSubject = Observable.just(it.toString())
-            textSubject
-                .debounce(300, TimeUnit.MILLISECONDS)
-                .filter(Predicate<String> {
-                    return@Predicate it.isNotEmpty() and (it.length > 3)
-                })
-                .subscribeOn(io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                    openSearch(it.trim())
-                }, {
-                    Timber.e(it)
-                })
-        }
+        search_toolbar.onTextChangedObservable
+            .doOnNext {
+                openSearch(it)
+            }
+            .subscribe()
 
         val getUpcomingMovies =
             MovieApiClient.apiClient
@@ -91,13 +74,12 @@ class FeedFragment : Fragment() {
                 Function3<MoviesResponse, MoviesResponse, MoviesResponse, MovieResult> { upcomingList, popularList, nowPlayingList ->
                     MovieResult(upcomingList.results, popularList.results, nowPlayingList.results)
                 })
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(io())
+            .subscribeOnIoAndObserveOnMainThread()
             .doOnSubscribe {
-                feedProgressBar.visibility = View.VISIBLE
+                progressBarVisibility(true)
             }
-            .doOnComplete {
-                feedProgressBar.visibility = View.GONE
+            .doOnTerminate {
+                progressBarVisibility(false)
             }
             .subscribe({
                 upcomingMoviesList = listOfMovies(R.string.upcoming, it.upcomingMoviesList)
@@ -160,6 +142,14 @@ class FeedFragment : Fragment() {
                     }.toList()
             )
         )
+    }
+
+    private fun progressBarVisibility(visible: Boolean) {
+        feedProgressBar.visibility = if (visible) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
     }
 
     override fun onStop() {
