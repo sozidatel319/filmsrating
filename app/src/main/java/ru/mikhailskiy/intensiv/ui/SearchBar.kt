@@ -1,14 +1,20 @@
 package ru.mikhailskiy.intensiv.ui
 
 import android.content.Context
+import java.util.concurrent.TimeUnit
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.core.view.isVisible
+import androidx.core.widget.doAfterTextChanged
+import io.reactivex.Observable
+import io.reactivex.ObservableOnSubscribe
+import io.reactivex.functions.Predicate
 import kotlinx.android.synthetic.main.search_toolbar.view.*
 import ru.mikhailskiy.intensiv.R
+import ru.mikhailskiy.intensiv.subscribeOnIoAndObserveOnMainThread
 
 class SearchBar @JvmOverloads constructor(
     context: Context,
@@ -58,5 +64,20 @@ class SearchBar @JvmOverloads constructor(
                 delete_text_button.visibility = View.GONE
             }
         }
+    }
+
+    val onTextChangedObservable: Observable<String> by lazy {
+        Observable
+            .create(ObservableOnSubscribe<String> { subscriber ->
+                editText.doAfterTextChanged { text ->
+                    subscriber.onNext(text.toString())
+                }
+            })
+            .filter(Predicate<String> {
+                return@Predicate it.isNotEmpty() and (it.length > 3)
+            })
+            .debounce(300, TimeUnit.MILLISECONDS)
+            .map { it.trim() }
+            .subscribeOnIoAndObserveOnMainThread()
     }
 }

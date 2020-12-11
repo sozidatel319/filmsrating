@@ -3,8 +3,6 @@ package ru.mikhailskiy.intensiv.network
 import io.reactivex.Single
 import retrofit2.http.GET
 import retrofit2.http.Query
-import retrofit2.http.QueryMap
-import retrofit2.http.QueryName
 import ru.mikhailskiy.intensiv.BuildConfig
 import ru.mikhailskiy.intensiv.data.MoviesResponse
 
@@ -51,6 +49,12 @@ interface MovieApiInterface {
     fun getPopularTvShows(
         @Query("api_key") apiKey: String = BuildConfig.THE_MOVIE_DATABASE_API,
         @Query("language") language: String = "ru"
+    ): Single<MoviesResponse>
+
+    @GET("search/movie")
+    fun searchMovie(
+        @Query("api_key") apiKey: String = BuildConfig.THE_MOVIE_DATABASE_API,
+        @Query("query") query: String
     ): Single<MoviesResponse>
 
 }
