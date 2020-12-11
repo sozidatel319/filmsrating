@@ -8,4 +8,8 @@ object Constants {
     const val YEAR_OF_FILM = "YEAR_OF_FILM"
     const val RATING_OF_FILM = "RATING_OF_FILM"
     const val FILM_POSTER = "FILM_POSTER"
+    const val ID_FILM = "ID_FILM"
+    const val MOVIE = "MOVIE"
+
+    const val DATABASE_NAME = "MOVIE_FINDER_APP_DATABASE"
 }

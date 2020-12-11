@@ -50,4 +50,5 @@ ext {
     okHttp3LoggingInterseptorVersion = '4.9.0'
     rxJava2Version = '2.2.19'
     rxAndroidVersion = '2.1.1'
+    roomVersion = "2.2.5"
 }

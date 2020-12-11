@@ -17,7 +17,7 @@ import ru.mikhailskiy.intensiv.Constants
 import ru.mikhailskiy.intensiv.R
 import ru.mikhailskiy.intensiv.data.Movie
 import ru.mikhailskiy.intensiv.network.MovieApiClient
-import ru.mikhailskiy.intensiv.subscribeOnIoAndObserveOnMainThread
+import ru.mikhailskiy.intensiv.addSchedulers
 import ru.mikhailskiy.intensiv.ui.feed.MainCardContainer
 import ru.mikhailskiy.intensiv.ui.feed.MovieItem
 import timber.log.Timber
@@ -48,7 +48,7 @@ class SearchFragment : Fragment() {
         searchTerm?.let { it ->
             MovieApiClient.apiClient.searchMovie(query = it)
                 .toObservable()
-                .subscribeOnIoAndObserveOnMainThread()
+                .addSchedulers()
                 .flatMap { moviesList -> fromIterable(moviesList.results) }
                 .map { movie -> MovieItem(movie) { item -> openMovieDetails(item) } }.toList()
                 .doOnSubscribe {
@@ -93,6 +93,7 @@ class SearchFragment : Fragment() {
         }
 
         val bundle = Bundle()
+        bundle.putParcelable(Constants.MOVIE,movie)
         bundle.putString(Constants.TITLE, movie.title)
         bundle.putString(Constants.ABOUT_FILM, movie.overview)
         bundle.putString(Constants.FILM_POSTER, movie.fullBackDropPath)

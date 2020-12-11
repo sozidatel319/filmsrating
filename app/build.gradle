@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 
 def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
@@ -81,6 +82,13 @@ dependencies {
     //RxJava2
     implementation "io.reactivex.rxjava2:rxjava:$rxJava2Version"
     implementation "io.reactivex.rxjava2:rxandroid:$rxAndroidVersion"
+
+    //Room
+    kapt "androidx.room:room-compiler:$roomVersion"
+    implementation "androidx.room:room-runtime:$roomVersion"
+    implementation "androidx.room:room-ktx:$roomVersion"
+    implementation "androidx.room:room-rxjava2:$roomVersion"
+    testImplementation "androidx.room:room-testing:$roomVersion"
 
     implementation "androidx.recyclerview:recyclerview:$rootProject.recyclerViewVersion"
     implementation 'androidx.cardview:cardview:1.0.0'

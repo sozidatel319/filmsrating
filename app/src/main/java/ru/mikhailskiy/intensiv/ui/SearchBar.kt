@@ -14,7 +14,7 @@ import io.reactivex.ObservableOnSubscribe
 import io.reactivex.functions.Predicate
 import kotlinx.android.synthetic.main.search_toolbar.view.*
 import ru.mikhailskiy.intensiv.R
-import ru.mikhailskiy.intensiv.subscribeOnIoAndObserveOnMainThread
+import ru.mikhailskiy.intensiv.addSchedulers
 
 class SearchBar @JvmOverloads constructor(
     context: Context,
@@ -78,6 +78,6 @@ class SearchBar @JvmOverloads constructor(
             })
             .debounce(300, TimeUnit.MILLISECONDS)
             .map { it.trim() }
-            .subscribeOnIoAndObserveOnMainThread()
+            .addSchedulers()
     }
 }
