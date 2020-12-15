@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-class MovieDTO (
+class MovieEntity (
     @PrimaryKey
     var id: Long?,
     val posterPath: String?,

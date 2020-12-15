@@ -11,5 +11,9 @@ object Constants {
     const val ID_FILM = "ID_FILM"
     const val MOVIE = "MOVIE"
 
+    const val MIN_LENGTH = 3
+    const val MIN_DENOUNCE_TIMEOUT: Long = 300
+
+
     const val DATABASE_NAME = "MOVIE_FINDER_APP_DATABASE"
 }

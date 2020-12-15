@@ -12,10 +12,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.Function3
 import kotlinx.android.synthetic.main.feed_fragment.*
 import kotlinx.android.synthetic.main.feed_header.*
-import ru.mikhailskiy.intensiv.BuildConfig
-import ru.mikhailskiy.intensiv.Constants
-import ru.mikhailskiy.intensiv.R
-import ru.mikhailskiy.intensiv.addSchedulers
+import ru.mikhailskiy.intensiv.*
 import ru.mikhailskiy.intensiv.data.Movie
 import ru.mikhailskiy.intensiv.data.MovieResult
 import ru.mikhailskiy.intensiv.data.MoviesResponse
@@ -72,10 +69,10 @@ class FeedFragment : Fragment() {
                 })
             .addSchedulers()
             .doOnSubscribe {
-                progressBarVisibility(true)
+                feedProgressBar.progressBarVisible(true)
             }
             .doOnTerminate {
-                progressBarVisibility(false)
+                feedProgressBar.progressBarVisible(false)
             }
             .subscribe({
                 upcomingMoviesList = listOfMovies(R.string.upcoming, it.upcomingMoviesList)
@@ -105,10 +102,6 @@ class FeedFragment : Fragment() {
         }
 
         val bundle = Bundle()
-        movie.id?.let { bundle.putLong(Constants.ID_FILM, it) }
-        bundle.putString(Constants.TITLE, movie.title)
-        bundle.putString(Constants.ABOUT_FILM, movie.overview)
-        bundle.putString(Constants.FILM_POSTER, movie.fullBackDropPath)
         bundle.putParcelable(Constants.MOVIE, movie)
         findNavController().navigate(R.id.movie_details_fragment, bundle, options)
     }
@@ -142,14 +135,6 @@ class FeedFragment : Fragment() {
         )
     }
 
-    private fun progressBarVisibility(visible: Boolean) {
-        feedProgressBar.visibility = if (visible) {
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
-    }
-
     override fun onStop() {
         super.onStop()
         search_toolbar.clear()
@@ -158,9 +143,5 @@ class FeedFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.main_menu, menu)
-    }
-
-    companion object {
-        const val API_KEY = BuildConfig.THE_MOVIE_DATABASE_API
     }
 }

@@ -1,5 +1,7 @@
 package ru.mikhailskiy.intensiv
 
+import android.view.View
+import androidx.core.view.isVisible
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -11,7 +13,7 @@ fun <T> Observable<T>.addSchedulers(): Observable<T> {
         .subscribeOn(Schedulers.io())
 }
 
-fun <T>Single<T>.addSchedulers(): Single<T> {
+fun <T> Single<T>.addSchedulers(): Single<T> {
     return observeOn(AndroidSchedulers.mainThread())
         .subscribeOn(Schedulers.io())
 }
@@ -19,4 +21,12 @@ fun <T>Single<T>.addSchedulers(): Single<T> {
 fun Completable.addSchedulers(): Completable {
     return observeOn(AndroidSchedulers.mainThread())
         .subscribeOn(Schedulers.io())
+}
+
+fun View.progressBarVisible(visible: Boolean) {
+    if (visible) {
+        this.visibility = View.GONE
+    } else {
+        this.visibility = View.VISIBLE
+    }
 }

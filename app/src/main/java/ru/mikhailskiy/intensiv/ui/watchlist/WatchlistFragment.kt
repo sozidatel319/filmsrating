@@ -1,5 +1,6 @@
 package ru.mikhailskiy.intensiv.ui.watchlist
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -17,10 +18,10 @@ import ru.mikhailskiy.intensiv.database.MovieDao
 
 class WatchlistFragment : Fragment() {
     // TODO: Rename and change types of parameters
-    private val database: MovieDao = MovieFinderApp.instance?.database?.likedFilmsDao!!
+    private val database: MovieDao by lazy { MovieFinderApp.instance.database.likedFilmsDao }
     private lateinit var moviesList: List<MoviePreviewItem>
 
-    val adapter by lazy {
+    private val adapter by lazy {
         GroupAdapter<GroupieViewHolder>()
     }
 
@@ -47,23 +48,33 @@ class WatchlistFragment : Fragment() {
             .subscribe { it ->
                 moviesList =
                     it.map { dto ->
-                        val path = dto.posterPath
                         MoviePreviewItem(
                             Movie(
-                                dto.posterPath, dto.adult, dto.overview,
-                                dto.releaseDate, null, dto.id, dto.originalTitle,
-                                dto.originalLanguage, dto.title, dto.backDropPath, null,
-                                dto.voteCount, dto.video, dto.voteAverage, dto.liked
+                                posterPath = dto.posterPath,
+                                adult = dto.adult,
+                                overview = dto.overview,
+                                releaseDate = dto.releaseDate,
+                                genreIds = null,
+                                id = dto.id,
+                                originalTitle = dto.originalTitle,
+                                originalLanguage = dto.originalLanguage,
+                                title = dto.title,
+                                backDropPath = dto.backDropPath,
+                                popularity = null,
+                                voteCount = dto.voteCount,
+                                video = dto.video,
+                                voteAverage = dto.voteAverage,
+                                liked = dto.liked
                             )
                         ) { movie -> }
                     }.toList()
                 movies_recycler_view.adapter = adapter.apply { addAll(moviesList) }
             }
-       /* MockRepository.getMovies().map {
-            MoviePreviewItem(
-                it
-            ) { movie -> }
-        }.toList()*/
+        /* MockRepository.getMovies().map {
+             MoviePreviewItem(
+                 it
+             ) { movie -> }
+         }.toList()*/
 
     }
 

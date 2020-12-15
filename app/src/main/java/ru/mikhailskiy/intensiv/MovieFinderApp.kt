@@ -30,7 +30,7 @@ class MovieFinderApp : Application() {
     }
 
     companion object {
-        var instance: MovieFinderApp? = null
-            private set
+        lateinit var instance: MovieFinderApp
+        private set
     }
 }
