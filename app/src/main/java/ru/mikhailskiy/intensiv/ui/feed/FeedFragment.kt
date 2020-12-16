@@ -7,19 +7,16 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
-import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.Function3
 import kotlinx.android.synthetic.main.feed_fragment.*
 import kotlinx.android.synthetic.main.feed_header.*
-import ru.mikhailskiy.intensiv.BuildConfig
-import ru.mikhailskiy.intensiv.Constants
-import ru.mikhailskiy.intensiv.R
+import ru.mikhailskiy.intensiv.*
 import ru.mikhailskiy.intensiv.data.Movie
 import ru.mikhailskiy.intensiv.data.MovieResult
 import ru.mikhailskiy.intensiv.data.MoviesResponse
 import ru.mikhailskiy.intensiv.network.MovieApiClient
-import ru.mikhailskiy.intensiv.subscribeOnIoAndObserveOnMainThread
 import timber.log.Timber
 
 
@@ -46,7 +43,6 @@ class FeedFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         movies_recycler_view.adapter = adapter.apply { addAll(listOf()) }
-
         search_toolbar.onTextChangedObservable
             .doOnNext {
                 openSearch(it)
@@ -56,30 +52,27 @@ class FeedFragment : Fragment() {
         val getUpcomingMovies =
             MovieApiClient.apiClient
                 .getUpcomingMovies()
-                .toObservable()
 
         val getPopularMovies =
             MovieApiClient.apiClient
                 .getPopularMovies()
-                .toObservable()
 
         val getNowPlayingMovies =
             MovieApiClient.apiClient
                 .getNowPlayingMovies()
-                .toObservable()
 
-        val resultOfResponse = Observable
+        val resultOfResponse = Single
             .zip(
                 getUpcomingMovies, getPopularMovies, getNowPlayingMovies,
                 Function3<MoviesResponse, MoviesResponse, MoviesResponse, MovieResult> { upcomingList, popularList, nowPlayingList ->
                     MovieResult(upcomingList.results, popularList.results, nowPlayingList.results)
                 })
-            .subscribeOnIoAndObserveOnMainThread()
+            .addSchedulers()
             .doOnSubscribe {
-                progressBarVisibility(true)
+                feedProgressBar.progressBarVisible(true)
             }
             .doOnTerminate {
-                progressBarVisibility(false)
+                feedProgressBar.progressBarVisible(false)
             }
             .subscribe({
                 upcomingMoviesList = listOfMovies(R.string.upcoming, it.upcomingMoviesList)
@@ -109,9 +102,7 @@ class FeedFragment : Fragment() {
         }
 
         val bundle = Bundle()
-        bundle.putString(Constants.TITLE, movie.title)
-        bundle.putString(Constants.ABOUT_FILM, movie.overview)
-        bundle.putString(Constants.FILM_POSTER, movie.fullBackDropPath)
+        bundle.putParcelable(Constants.MOVIE, movie)
         findNavController().navigate(R.id.movie_details_fragment, bundle, options)
     }
 
@@ -144,14 +135,6 @@ class FeedFragment : Fragment() {
         )
     }
 
-    private fun progressBarVisibility(visible: Boolean) {
-        feedProgressBar.visibility = if (visible) {
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
-    }
-
     override fun onStop() {
         super.onStop()
         search_toolbar.clear()
@@ -160,9 +143,5 @@ class FeedFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.main_menu, menu)
-    }
-
-    companion object {
-        const val API_KEY = BuildConfig.THE_MOVIE_DATABASE_API
     }
 }

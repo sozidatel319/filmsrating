@@ -17,10 +17,12 @@ class MoviePreviewItem(
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
         viewHolder.image_preview.setOnClickListener {
             onClick.invoke(content)
+            val s = content.fullBackDropPath
         }
         // TODO Получать из модели
+
         Picasso.get()
-            .load("https://www.kinopoisk.ru/images/film_big/1143242.jpg")
+            .load(content.posterPath)
             .into(viewHolder.image_preview)
     }
 }
