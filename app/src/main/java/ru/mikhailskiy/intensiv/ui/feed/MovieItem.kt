@@ -5,7 +5,7 @@ import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import com.xwray.groupie.kotlinandroidextensions.Item
 import kotlinx.android.synthetic.main.item_with_text.*
 import ru.mikhailskiy.intensiv.R
-import ru.mikhailskiy.intensiv.data.Movie
+import ru.mikhailskiy.intensiv.data.vo.Movie
 
 class MovieItem(
     private val content: Movie,
@@ -23,7 +23,7 @@ class MovieItem(
 
         // TODO Получать из модели
         Picasso.get()
-            .load(content.fullPath)
+            .load(content.backDropPath)
             .into(viewHolder.image_preview)
     }
 }

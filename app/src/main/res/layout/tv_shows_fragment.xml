@@ -10,7 +10,7 @@
         android:id="@+id/tvShowProgressBar"
         android:layout_width="@dimen/dimens_20"
         android:layout_height="@dimen/dimens_20"
-        android:visibility="invisible"
+        android:visibility="gone"
         android:layout_gravity="center"
         />
 

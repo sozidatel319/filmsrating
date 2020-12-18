@@ -1,4 +1,4 @@
-package ru.mikhailskiy.intensiv.network
+package ru.mikhailskiy.intensiv.data.network
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

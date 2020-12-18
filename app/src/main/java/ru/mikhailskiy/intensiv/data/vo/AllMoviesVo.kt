@@ -1,6 +1,6 @@
-package ru.mikhailskiy.intensiv.data
+package ru.mikhailskiy.intensiv.data.vo
 
-data class MovieResult(
+data class AllMoviesVo(
     val upcomingMoviesList: List<Movie>,
     val popularMoviesList: List<Movie>,
     val nowPlayingMoviesList: List<Movie>
