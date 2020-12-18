@@ -85,6 +85,7 @@ class FeedFragment : Fragment(), FeedPresenter.FeedView {
 
     override fun onStop() {
         super.onStop()
+        adapter.clear()
         search_toolbar.clear()
     }
 

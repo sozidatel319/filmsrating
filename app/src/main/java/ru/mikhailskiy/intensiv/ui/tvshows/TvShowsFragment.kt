@@ -104,6 +104,11 @@ class TvShowsFragment : Fragment(), TvShowPresenter.FeedView {
         Timber.e(throwable, errorText)
     }
 
+    override fun onStop() {
+        adapter.clear()
+        super.onStop()
+    }
+
     override fun onDestroy() {
         tvShowPresenter.detachView()
         super.onDestroy()

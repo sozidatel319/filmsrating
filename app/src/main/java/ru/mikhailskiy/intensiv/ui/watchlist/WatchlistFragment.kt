@@ -74,6 +74,10 @@ class WatchlistFragment : Fragment(), WatchListPresenter.FeedView {
         Timber.e(throwable, errorText)
     }
 
+    override fun onStop() {
+        adapter.clear()
+        super.onStop()
+    }
     override fun onDestroy() {
         super.onDestroy()
         watchListPresenter.detachView()

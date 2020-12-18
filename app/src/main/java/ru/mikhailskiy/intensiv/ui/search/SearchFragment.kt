@@ -58,6 +58,11 @@ class SearchFragment : Fragment(), SearchFragmentPresenter.FeedView {
         }
     }
 
+    override fun onStop() {
+        adapter.clear()
+        super.onStop()
+    }
+
     override fun onDestroy() {
         searchFragmentPresenter.detachView()
         super.onDestroy()
