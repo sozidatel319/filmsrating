@@ -29,9 +29,9 @@ fun Completable.addSchedulers(): Completable {
 
 fun View.progressBarVisible(visible: Boolean) {
     if (visible) {
-        this.visibility = View.GONE
-    } else {
         this.visibility = View.VISIBLE
+    } else {
+        this.visibility = View.GONE
     }
 }
 
