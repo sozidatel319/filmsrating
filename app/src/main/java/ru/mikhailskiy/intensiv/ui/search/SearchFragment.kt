@@ -10,6 +10,7 @@ import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.feed_fragment.movies_recycler_view
 import kotlinx.android.synthetic.main.feed_header.*
 import kotlinx.android.synthetic.main.fragment_search.*
+import kotlinx.android.synthetic.main.progressbar.*
 import ru.mikhailskiy.intensiv.*
 import ru.mikhailskiy.intensiv.data.repository.AllMoviesRepository
 import ru.mikhailskiy.intensiv.data.vo.Movie
@@ -91,11 +92,11 @@ class SearchFragment : Fragment(), SearchFragmentPresenter.FeedView {
     }
 
     override fun showLoading() {
-        searchProgressBar.progressBarVisible(true)
+        progressBar.progressBarVisible(true)
     }
 
     override fun hideLoading() {
-        searchProgressBar.progressBarVisible(false)
+        progressBar.progressBarVisible(false)
     }
 
     override fun showEmptyMovies() {

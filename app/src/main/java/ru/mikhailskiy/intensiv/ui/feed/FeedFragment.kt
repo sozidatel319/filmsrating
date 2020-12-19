@@ -9,6 +9,7 @@ import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.feed_fragment.*
 import kotlinx.android.synthetic.main.feed_header.*
+import kotlinx.android.synthetic.main.progressbar.*
 import ru.mikhailskiy.intensiv.*
 import ru.mikhailskiy.intensiv.data.vo.AllMoviesVo
 import ru.mikhailskiy.intensiv.data.repository.AllMoviesRepository
@@ -115,11 +116,11 @@ class FeedFragment : Fragment(), FeedPresenter.FeedView {
     }
 
     override fun showLoading() {
-        feedProgressBar.progressBarVisible(true)
+        progressBar.progressBarVisible(true)
     }
 
     override fun hideLoading() {
-        feedProgressBar.progressBarVisible(false)
+        progressBar.progressBarVisible(false)
     }
 
     override fun showEmptyMovies() {

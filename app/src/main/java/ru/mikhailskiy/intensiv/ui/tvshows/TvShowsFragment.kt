@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
+import kotlinx.android.synthetic.main.progressbar.*
 import kotlinx.android.synthetic.main.tv_shows_fragment.*
 import ru.mikhailskiy.intensiv.R
 import ru.mikhailskiy.intensiv.data.repository.AllTvShowsRepository
@@ -90,11 +91,11 @@ class TvShowsFragment : Fragment(), TvShowPresenter.FeedView {
     }
 
     override fun showLoading() {
-        tvShowProgressBar.progressBarVisible(true)
+        progressBar.progressBarVisible(true)
     }
 
     override fun hideLoading() {
-        tvShowProgressBar.progressBarVisible(false)
+        progressBar.progressBarVisible(false)
     }
 
     override fun showEmptyMovies() {
