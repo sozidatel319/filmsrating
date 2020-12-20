@@ -20,6 +20,6 @@ interface MovieDao {
     @Query("SELECT * FROM MovieEntity")
     fun getAllLikedMovies(): Single<List<MovieEntity>>
 
-    @Query("SELECT * FROM MovieEntity WHERE id =:id")
-    fun findLikedFilm(id: Long): Observable<MovieEntity>
+    @Query("SELECT EXISTS (SELECT 1 FROM MovieEntity WHERE id =:id)")
+    fun findLikedFilm(id: Long): Single<Boolean>
 }

@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity
 class MovieEntity (
     @PrimaryKey
-    var id: Long?,
+    var id: Long,
     val posterPath: String?,
     var adult: Boolean?,
     var overview: String?,

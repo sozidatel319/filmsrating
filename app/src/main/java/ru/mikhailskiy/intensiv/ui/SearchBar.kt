@@ -13,7 +13,7 @@ import io.reactivex.Observable
 import io.reactivex.ObservableOnSubscribe
 import io.reactivex.functions.Predicate
 import kotlinx.android.synthetic.main.search_toolbar.view.*
-import ru.mikhailskiy.intensiv.Constants.MIN_DENOUNCE_TIMEOUT
+import ru.mikhailskiy.intensiv.Constants.MIN_DEBOUNCE_TIMEOUT
 import ru.mikhailskiy.intensiv.Constants.MIN_LENGTH
 import ru.mikhailskiy.intensiv.R
 import ru.mikhailskiy.intensiv.addSchedulers
@@ -79,7 +79,7 @@ class SearchBar @JvmOverloads constructor(
             .filter(Predicate<String> {
                 return@Predicate it.isNotEmpty() and (it.length > MIN_LENGTH)
             })
-            .debounce(MIN_DENOUNCE_TIMEOUT, TimeUnit.MILLISECONDS)
+            .debounce(MIN_DEBOUNCE_TIMEOUT, TimeUnit.MILLISECONDS)
             .addSchedulers()
     }
 }

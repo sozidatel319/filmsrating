@@ -11,23 +11,27 @@ import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.movie_details_fragment.*
 import kotlinx.android.synthetic.main.toolbar.*
 import ru.mikhailskiy.intensiv.Constants
-import ru.mikhailskiy.intensiv.MovieFinderApp
 import ru.mikhailskiy.intensiv.R
-import ru.mikhailskiy.intensiv.addSchedulers
-import ru.mikhailskiy.intensiv.data.Movie
-import ru.mikhailskiy.intensiv.database.MovieEntity
-import ru.mikhailskiy.intensiv.database.MovieDao
+import ru.mikhailskiy.intensiv.data.repository.LikedMovieRepository
+import ru.mikhailskiy.intensiv.data.vo.Movie
+import ru.mikhailskiy.intensiv.domain.usecase.LikedMovieUseCase
+import ru.mikhailskiy.intensiv.presentation.presenter.moviedetails.MovieDetailsPresenter
+import ru.mikhailskiy.intensiv.presentation.view.movie_details.MovieDetailsView
 
-class MovieDetailsFragment : Fragment() {
+class MovieDetailsFragment : Fragment(), MovieDetailsView {
 
-    private val likedFilmsDao: MovieDao by lazy { MovieFinderApp.instance.database.likedFilmsDao }
+    private val movieDetailsPresenter: MovieDetailsPresenter by lazy {
+        MovieDetailsPresenter(
+            LikedMovieUseCase(LikedMovieRepository()),
+            this
+        )
+    }
 
     private var idFilm: Long? = null
     private var titleFilm: String? = null
     private var aboutFilm: String? = null
     private var path: String? = null
     private var movie: Movie? = null
-    private var isLiked: Boolean = false
     private lateinit var likeButton: ToggleButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,7 +41,7 @@ class MovieDetailsFragment : Fragment() {
             movie = it.getParcelable(Constants.MOVIE) as? Movie
         }
         idFilm = movie?.id
-        path = movie?.fullBackDropPath
+        path = movie?.backDropPath
         aboutFilm = movie?.overview
         titleFilm = movie?.title
     }
@@ -51,13 +55,14 @@ class MovieDetailsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        movieDetailsPresenter.attachView(this)
         titleFilmTextView.text = titleFilm
         aboutFilmTextView.text = aboutFilm
         Picasso.get()
             .load(path)
             .into(filmPosterImageView)
         likeButton = requireView().findViewById(R.id.likeButton)
-        this.setLikeButtonState()
+        movie?.let { movieDetailsPresenter.findLikedMovieInDatabase(it) }
         likeButton.setOnCheckedChangeListener(likeButtonListener())
         backButton.setOnClickListener(backButtonListener())
 
@@ -68,32 +73,10 @@ class MovieDetailsFragment : Fragment() {
 
         when (button.isChecked) {
             true -> {
-                likedFilmsDao.insertMovie(
-                    MovieEntity(
-                        id = idFilm,
-                        posterPath = path,
-                        adult = false,
-                        overview = "",
-                        releaseDate = "",
-                        originalTitle = titleFilm,
-                        originalLanguage = "",
-                        title = titleFilm,
-                        backDropPath = "",
-                        voteCount = null,
-                        video = null,
-                        voteAverage = 0.0,
-                        liked = true
-                    )
-                )
-                    .addSchedulers()
-                    .subscribe()
+                movie?.let { movieDetailsPresenter.putLikedMovieToDataBase(it) }
             }
             else -> {
-                idFilm?.let {
-                    likedFilmsDao.deleteMovieById(it)
-                        .addSchedulers()
-                        .subscribe()
-                }
+                movie?.let { movieDetailsPresenter.deleteLikedMovieFromDataBase(it) }
             }
         }
     }
@@ -102,16 +85,7 @@ class MovieDetailsFragment : Fragment() {
         requireActivity().onBackPressed()
     }
 
-
-    private fun setLikeButtonState() {
-        val findLikedFilmDisposable = movie?.id?.let { it ->
-            likedFilmsDao.findLikedFilm(it)
-                .addSchedulers()
-                .subscribe { movieEntity ->
-                    isLiked = movieEntity.liked == true
-                    likeButton.isChecked = isLiked
-                }
-        }
-
+    override fun movieInDatabase(isExist: Boolean) {
+        likeButton.isChecked = isExist
     }
 }

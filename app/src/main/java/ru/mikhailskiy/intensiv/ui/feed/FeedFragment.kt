@@ -7,20 +7,25 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
-import io.reactivex.Single
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.functions.Function3
 import kotlinx.android.synthetic.main.feed_fragment.*
 import kotlinx.android.synthetic.main.feed_header.*
+import kotlinx.android.synthetic.main.progressbar.*
 import ru.mikhailskiy.intensiv.*
-import ru.mikhailskiy.intensiv.data.Movie
-import ru.mikhailskiy.intensiv.data.MovieResult
-import ru.mikhailskiy.intensiv.data.MoviesResponse
-import ru.mikhailskiy.intensiv.network.MovieApiClient
+import ru.mikhailskiy.intensiv.data.vo.AllMoviesVo
+import ru.mikhailskiy.intensiv.data.repository.AllMoviesRepository
+import ru.mikhailskiy.intensiv.data.vo.Movie
+import ru.mikhailskiy.intensiv.domain.usecase.AllMoviesUseCase
+import ru.mikhailskiy.intensiv.presentation.view.BaseView
+import ru.mikhailskiy.intensiv.presentation.presenter.feed.FeedPresenter
+import ru.mikhailskiy.intensiv.presentation.view.feed.ShowMoviesView
 import timber.log.Timber
 
 
-class FeedFragment : Fragment() {
+class FeedFragment : Fragment(), BaseView, ShowMoviesView {
+
+    private val feedPresenter: FeedPresenter by lazy {
+        FeedPresenter(AllMoviesUseCase(AllMoviesRepository()), this, this)
+    }
 
     private val adapter by lazy {
         GroupAdapter<GroupieViewHolder>()
@@ -28,7 +33,6 @@ class FeedFragment : Fragment() {
     private lateinit var upcomingMoviesList: List<MainCardContainer>
     private lateinit var popularMoviesList: List<MainCardContainer>
     private lateinit var nowPlayingMoviesList: List<MainCardContainer>
-    private val compositeDisposable = CompositeDisposable()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,68 +46,15 @@ class FeedFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        feedPresenter.attachView(this)
+        feedPresenter.getMovies()
+
         movies_recycler_view.adapter = adapter.apply { addAll(listOf()) }
         search_toolbar.onTextChangedObservable
             .doOnNext {
                 openSearch(it)
             }
             .subscribe()
-
-        val getUpcomingMovies =
-            MovieApiClient.apiClient
-                .getUpcomingMovies()
-
-        val getPopularMovies =
-            MovieApiClient.apiClient
-                .getPopularMovies()
-
-        val getNowPlayingMovies =
-            MovieApiClient.apiClient
-                .getNowPlayingMovies()
-
-        val resultOfResponse = Single
-            .zip(
-                getUpcomingMovies, getPopularMovies, getNowPlayingMovies,
-                Function3<MoviesResponse, MoviesResponse, MoviesResponse, MovieResult> { upcomingList, popularList, nowPlayingList ->
-                    MovieResult(upcomingList.results, popularList.results, nowPlayingList.results)
-                })
-            .addSchedulers()
-            .doOnSubscribe {
-                feedProgressBar.progressBarVisible(true)
-            }
-            .doOnTerminate {
-                feedProgressBar.progressBarVisible(false)
-            }
-            .subscribe({
-                upcomingMoviesList = listOfMovies(R.string.upcoming, it.upcomingMoviesList)
-                nowPlayingMoviesList = listOfMovies(R.string.now_playing, it.nowPlayingMoviesList)
-                popularMoviesList = listOfMovies(R.string.popular, it.popularMoviesList)
-                movies_recycler_view.adapter =
-                    adapter.apply {
-                        addAll(upcomingMoviesList)
-                        addAll(nowPlayingMoviesList)
-                        addAll(popularMoviesList)
-                    }
-            }, {
-                Timber.e(it)
-            })
-        compositeDisposable.add(resultOfResponse)
-    }
-
-
-    private fun openMovieDetails(movie: Movie) {
-        val options = navOptions {
-            anim {
-                enter = R.anim.slide_in_right
-                exit = R.anim.slide_out_left
-                popEnter = R.anim.slide_in_left
-                popExit = R.anim.slide_out_right
-            }
-        }
-
-        val bundle = Bundle()
-        bundle.putParcelable(Constants.MOVIE, movie)
-        findNavController().navigate(R.id.movie_details_fragment, bundle, options)
     }
 
     private fun openSearch(searchText: String) {
@@ -128,7 +79,7 @@ class FeedFragment : Fragment() {
                 listMovies
                     .map {
                         MovieItem(it) { movie ->
-                            openMovieDetails(movie)
+                            openMovieDetails(movie, R.id.movie_details_fragment)
                         }
                     }.toList()
             )
@@ -137,11 +88,47 @@ class FeedFragment : Fragment() {
 
     override fun onStop() {
         super.onStop()
+        adapter.clear()
         search_toolbar.clear()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        feedPresenter.detachView()
     }
 
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.main_menu, menu)
+    }
+
+    override fun showMovies(movies: AllMoviesVo) {
+        upcomingMoviesList = listOfMovies(R.string.upcoming, movies.upcomingMoviesList)
+        nowPlayingMoviesList = listOfMovies(R.string.now_playing, movies.nowPlayingMoviesList)
+        popularMoviesList = listOfMovies(R.string.popular, movies.popularMoviesList)
+        println(upcomingMoviesList)
+        println(nowPlayingMoviesList)
+        println(popularMoviesList)
+        movies_recycler_view.adapter =
+            adapter.apply {
+                addAll(upcomingMoviesList)
+                addAll(nowPlayingMoviesList)
+                addAll(popularMoviesList)
+            }
+    }
+
+    override fun showLoading() {
+        progressBar.progressBarVisible(true)
+    }
+
+    override fun hideLoading() {
+        progressBar.progressBarVisible(false)
+    }
+
+    override fun showEmptyMovies() {
+    }
+
+    override fun showError(throwable: Throwable, errorText: String) {
+        Timber.e(throwable, errorText)
     }
 }
