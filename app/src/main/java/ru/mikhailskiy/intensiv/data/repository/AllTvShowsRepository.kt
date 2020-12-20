@@ -1,7 +1,6 @@
 package ru.mikhailskiy.intensiv.data.repository
 
 import io.reactivex.Single
-import ru.mikhailskiy.intensiv.addSchedulers
 import ru.mikhailskiy.intensiv.data.mappers.MovieMapper.toValueList
 import ru.mikhailskiy.intensiv.data.network.MovieApiClient
 import ru.mikhailskiy.intensiv.data.vo.Movie
@@ -13,5 +12,4 @@ class AllTvShowsRepository : TvShowsRepository {
         MovieApiClient.apiClient.getPopularTvShows()
             .map { it.results }
             .map { it.toValueList() }
-            .addSchedulers()
 }
