@@ -34,6 +34,6 @@ class MovieDetailsPresenter(private val useCase: AllMoviesUseCase, private val f
     }
 
     interface FeedView {
-        fun movieInDatabase(exist: Boolean)
+        fun movieInDatabase(isExist: Boolean)
     }
 }

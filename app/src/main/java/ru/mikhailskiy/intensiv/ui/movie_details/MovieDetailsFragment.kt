@@ -84,7 +84,7 @@ class MovieDetailsFragment : Fragment(), MovieDetailsPresenter.FeedView {
         requireActivity().onBackPressed()
     }
 
-    override fun movieInDatabase(exist: Boolean) {
-        likeButton.isChecked = exist
+    override fun movieInDatabase(isExist: Boolean) {
+        likeButton.isChecked = isExist
     }
 }
