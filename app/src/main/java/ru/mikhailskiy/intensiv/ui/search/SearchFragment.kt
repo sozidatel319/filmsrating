@@ -9,22 +9,24 @@ import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.feed_fragment.movies_recycler_view
 import kotlinx.android.synthetic.main.feed_header.*
-import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.progressbar.*
 import ru.mikhailskiy.intensiv.*
-import ru.mikhailskiy.intensiv.data.repository.AllMoviesRepository
+import ru.mikhailskiy.intensiv.data.repository.FindMovieRepository
 import ru.mikhailskiy.intensiv.data.vo.Movie
-import ru.mikhailskiy.intensiv.domain.usecase.AllMoviesUseCase
+import ru.mikhailskiy.intensiv.domain.usecase.FindMovieUseCase
 import ru.mikhailskiy.intensiv.presentation.presenter.search.SearchFragmentPresenter
+import ru.mikhailskiy.intensiv.presentation.view.BaseView
+import ru.mikhailskiy.intensiv.presentation.view.search.SearchView
 import ru.mikhailskiy.intensiv.ui.feed.MainCardContainer
 import ru.mikhailskiy.intensiv.ui.feed.MovieItem
 import timber.log.Timber
 
-class SearchFragment : Fragment(), SearchFragmentPresenter.FeedView {
+class SearchFragment : Fragment(), BaseView, SearchView {
 
     private val searchFragmentPresenter: SearchFragmentPresenter by lazy {
         SearchFragmentPresenter(
-            AllMoviesUseCase(AllMoviesRepository()),
+            FindMovieUseCase(FindMovieRepository()),
+            this,
             this
         )
     }
@@ -87,9 +89,6 @@ class SearchFragment : Fragment(), SearchFragmentPresenter.FeedView {
             }
     }
 
-    override fun onError(throwable: Throwable, textError: String) {
-        Timber.e(throwable, textError)
-    }
 
     override fun showLoading() {
         progressBar.progressBarVisible(true)
@@ -100,5 +99,9 @@ class SearchFragment : Fragment(), SearchFragmentPresenter.FeedView {
     }
 
     override fun showEmptyMovies() {
+    }
+
+    override fun showError(throwable: Throwable, errorText: String) {
+        Timber.e(throwable, errorText)
     }
 }

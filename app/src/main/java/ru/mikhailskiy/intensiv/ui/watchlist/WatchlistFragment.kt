@@ -10,18 +10,22 @@ import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.fragment_watchlist.movies_recycler_view
 import ru.mikhailskiy.intensiv.R
-import ru.mikhailskiy.intensiv.data.repository.AllMoviesRepository
-import ru.mikhailskiy.intensiv.domain.usecase.AllMoviesUseCase
+import ru.mikhailskiy.intensiv.data.repository.LikedMovieRepository
+import ru.mikhailskiy.intensiv.domain.usecase.LikedMovieUseCase
 import ru.mikhailskiy.intensiv.presentation.presenter.watchlist.WatchListPresenter
+import ru.mikhailskiy.intensiv.presentation.view.BaseView
+import ru.mikhailskiy.intensiv.presentation.view.watchlist.LikedMoviesView
 import timber.log.Timber
 
-class WatchlistFragment : Fragment(), WatchListPresenter.FeedView {
+class WatchlistFragment : Fragment(), BaseView,LikedMoviesView {
 
     private val watchListPresenter: WatchListPresenter by lazy {
         WatchListPresenter(
-            AllMoviesUseCase(
-                AllMoviesRepository()
-            ), this
+            LikedMovieUseCase(
+                LikedMovieRepository()
+            ),
+            this,
+            this
         )
     }
 
@@ -57,10 +61,6 @@ class WatchlistFragment : Fragment(), WatchListPresenter.FeedView {
             }
     }
 
-    override fun showMoviesFromDb(movies: List<MoviePreviewItem>) {
-        movies_recycler_view.adapter = adapter.apply { addAll(movies) }
-    }
-
     override fun showLoading() {
     }
 
@@ -72,6 +72,10 @@ class WatchlistFragment : Fragment(), WatchListPresenter.FeedView {
 
     override fun showError(throwable: Throwable, errorText: String) {
         Timber.e(throwable, errorText)
+    }
+
+    override fun showLikedMoviesFromDb(movies: List<MoviePreviewItem>) {
+        movies_recycler_view.adapter = adapter.apply { addAll(movies) }
     }
 
     override fun onStop() {

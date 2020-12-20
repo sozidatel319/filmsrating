@@ -1,36 +1,30 @@
 package ru.mikhailskiy.intensiv.presentation.presenter.search
 
 import io.reactivex.disposables.CompositeDisposable
-import ru.mikhailskiy.intensiv.data.vo.Movie
-import ru.mikhailskiy.intensiv.domain.usecase.AllMoviesUseCase
+import ru.mikhailskiy.intensiv.domain.usecase.FindMovieUseCase
 import ru.mikhailskiy.intensiv.presentation.base.BasePresenter
+import ru.mikhailskiy.intensiv.presentation.view.BaseView
+import ru.mikhailskiy.intensiv.presentation.view.search.SearchView
 
 class SearchFragmentPresenter(
-    private val useCase: AllMoviesUseCase,
-    private val feedView: FeedView
+    private val useCase: FindMovieUseCase,
+    private val baseView: BaseView,
+    private val searchView: SearchView
 ) :
-    BasePresenter<SearchFragmentPresenter.FeedView>() {
+    BasePresenter<BaseView>() {
 
     private val compositeDisposable = CompositeDisposable()
 
     fun searchMovie(text: String) {
         compositeDisposable.add(
             useCase.foundMovieInWeb(text)
-                .doOnSubscribe { feedView.showLoading() }
-                .doOnTerminate { feedView.hideLoading() }
+                .doOnSubscribe { baseView.showLoading() }
+                .doOnTerminate { baseView.hideLoading() }
                 .subscribe({
-                feedView.onMovieFounded(it)
+                searchView.onMovieFounded(it)
             }, {
-                feedView.onError(it, it.toString())
+                baseView.showError(it, it.toString())
             })
         )
-    }
-
-    interface FeedView {
-        fun onMovieFounded(movieList: List<Movie>)
-        fun onError(throwable: Throwable, textError: String)
-        fun showLoading()
-        fun hideLoading()
-        fun showEmptyMovies()
     }
 }

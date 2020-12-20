@@ -3,11 +3,12 @@ package ru.mikhailskiy.intensiv.presentation.presenter.moviedetails
 import io.reactivex.disposables.CompositeDisposable
 import ru.mikhailskiy.intensiv.data.mappers.MovieMapper.toMovieEntity
 import ru.mikhailskiy.intensiv.data.vo.Movie
-import ru.mikhailskiy.intensiv.domain.usecase.AllMoviesUseCase
+import ru.mikhailskiy.intensiv.domain.usecase.LikedMovieUseCase
 import ru.mikhailskiy.intensiv.presentation.base.BasePresenter
+import ru.mikhailskiy.intensiv.presentation.view.movie_details.MovieDetailsView
 
-class MovieDetailsPresenter(private val useCase: AllMoviesUseCase, private val feedView: FeedView) :
-    BasePresenter<MovieDetailsPresenter.FeedView>() {
+class MovieDetailsPresenter(private val useCase: LikedMovieUseCase, private val movieDetailsView: MovieDetailsView) :
+    BasePresenter<MovieDetailsView>() {
     private val compositeDisposable = CompositeDisposable()
 
     fun putLikedMovieToDataBase(movie: Movie) {
@@ -28,12 +29,8 @@ class MovieDetailsPresenter(private val useCase: AllMoviesUseCase, private val f
         compositeDisposable.add(
             useCase.foundLikedMovieByIdInDatabase(movie.id)
                 .subscribe { isExist ->
-                    feedView.movieInDatabase(isExist)
+                    movieDetailsView.movieInDatabase(isExist)
                 }
         )
-    }
-
-    interface FeedView {
-        fun movieInDatabase(isExist: Boolean)
     }
 }

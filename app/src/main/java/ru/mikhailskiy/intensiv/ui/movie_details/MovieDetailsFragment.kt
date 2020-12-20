@@ -12,16 +12,17 @@ import kotlinx.android.synthetic.main.movie_details_fragment.*
 import kotlinx.android.synthetic.main.toolbar.*
 import ru.mikhailskiy.intensiv.Constants
 import ru.mikhailskiy.intensiv.R
-import ru.mikhailskiy.intensiv.data.repository.AllMoviesRepository
+import ru.mikhailskiy.intensiv.data.repository.LikedMovieRepository
 import ru.mikhailskiy.intensiv.data.vo.Movie
-import ru.mikhailskiy.intensiv.domain.usecase.AllMoviesUseCase
+import ru.mikhailskiy.intensiv.domain.usecase.LikedMovieUseCase
 import ru.mikhailskiy.intensiv.presentation.presenter.moviedetails.MovieDetailsPresenter
+import ru.mikhailskiy.intensiv.presentation.view.movie_details.MovieDetailsView
 
-class MovieDetailsFragment : Fragment(), MovieDetailsPresenter.FeedView {
+class MovieDetailsFragment : Fragment(), MovieDetailsView {
 
     private val movieDetailsPresenter: MovieDetailsPresenter by lazy {
         MovieDetailsPresenter(
-            AllMoviesUseCase(AllMoviesRepository()),
+            LikedMovieUseCase(LikedMovieRepository()),
             this
         )
     }

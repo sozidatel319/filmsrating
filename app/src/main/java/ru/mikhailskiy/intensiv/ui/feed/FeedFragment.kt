@@ -15,14 +15,16 @@ import ru.mikhailskiy.intensiv.data.vo.AllMoviesVo
 import ru.mikhailskiy.intensiv.data.repository.AllMoviesRepository
 import ru.mikhailskiy.intensiv.data.vo.Movie
 import ru.mikhailskiy.intensiv.domain.usecase.AllMoviesUseCase
+import ru.mikhailskiy.intensiv.presentation.view.BaseView
 import ru.mikhailskiy.intensiv.presentation.presenter.feed.FeedPresenter
+import ru.mikhailskiy.intensiv.presentation.view.feed.ShowMoviesView
 import timber.log.Timber
 
 
-class FeedFragment : Fragment(), FeedPresenter.FeedView {
+class FeedFragment : Fragment(), BaseView, ShowMoviesView {
 
     private val feedPresenter: FeedPresenter by lazy {
-        FeedPresenter(AllMoviesUseCase(AllMoviesRepository()), this)
+        FeedPresenter(AllMoviesUseCase(AllMoviesRepository()), this, this)
     }
 
     private val adapter by lazy {

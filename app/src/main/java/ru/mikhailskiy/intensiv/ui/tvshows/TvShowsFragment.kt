@@ -15,6 +15,8 @@ import ru.mikhailskiy.intensiv.data.vo.Movie
 import ru.mikhailskiy.intensiv.domain.usecase.AllTvShowUseCase
 import ru.mikhailskiy.intensiv.openMovieDetails
 import ru.mikhailskiy.intensiv.presentation.presenter.tvshow.TvShowPresenter
+import ru.mikhailskiy.intensiv.presentation.view.BaseView
+import ru.mikhailskiy.intensiv.presentation.view.tvshow.PopularTvShowView
 import ru.mikhailskiy.intensiv.progressBarVisible
 import ru.mikhailskiy.intensiv.ui.feed.MainCardContainer
 import ru.mikhailskiy.intensiv.ui.feed.MovieItem
@@ -23,13 +25,15 @@ import timber.log.Timber
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
-class TvShowsFragment : Fragment(), TvShowPresenter.FeedView {
+class TvShowsFragment : Fragment(), BaseView, PopularTvShowView {
 
     private val tvShowPresenter: TvShowPresenter by lazy {
         TvShowPresenter(
             AllTvShowUseCase(
                 AllTvShowsRepository()
-            ), this
+            ),
+            this,
+            this
         )
     }
     private var param1: String? = null

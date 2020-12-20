@@ -1,37 +1,30 @@
 package ru.mikhailskiy.intensiv.presentation.presenter.watchlist
 
 import io.reactivex.disposables.CompositeDisposable
-import ru.mikhailskiy.intensiv.domain.usecase.AllMoviesUseCase
+import ru.mikhailskiy.intensiv.domain.usecase.LikedMovieUseCase
 import ru.mikhailskiy.intensiv.presentation.base.BasePresenter
-import ru.mikhailskiy.intensiv.ui.watchlist.MoviePreviewItem
+import ru.mikhailskiy.intensiv.presentation.view.BaseView
+import ru.mikhailskiy.intensiv.presentation.view.watchlist.LikedMoviesView
 
-class WatchListPresenter(private val useCase: AllMoviesUseCase, private val feedView: FeedView) :
-    BasePresenter<WatchListPresenter.FeedView>() {
+class WatchListPresenter(private val useCase: LikedMovieUseCase, private val baseView: BaseView, private val likedMoviesView: LikedMoviesView) :
+    BasePresenter<BaseView>() {
     private val compositeDisposable = CompositeDisposable()
 
     fun getLikedMovies() {
         compositeDisposable.add(
             useCase.getLikedMovies()
-            .doOnSubscribe { feedView.showLoading() }
-            .doOnTerminate { feedView.hideLoading() }
+            .doOnSubscribe { baseView.showLoading() }
+            .doOnTerminate { baseView.hideLoading() }
             .subscribe(
                 {
-                    feedView.showMoviesFromDb(it)
+                    likedMoviesView.showLikedMoviesFromDb(it)
                 },
                 { t ->
-                    feedView.showError(
+                    baseView.showError(
                         t, t.toString()
                     )
-                    feedView.showEmptyMovies()
+                    baseView.showEmptyMovies()
                 })
         )
-    }
-
-    interface FeedView {
-        fun showMoviesFromDb(movies: List<MoviePreviewItem>)
-        fun showLoading()
-        fun hideLoading()
-        fun showEmptyMovies()
-        fun showError(throwable: Throwable, errorText: String)
     }
 }
