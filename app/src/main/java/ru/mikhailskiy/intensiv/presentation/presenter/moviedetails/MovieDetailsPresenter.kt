@@ -27,8 +27,8 @@ class MovieDetailsPresenter(private val useCase: AllMoviesUseCase, private val f
     fun findLikedMovieInDatabase(movie: Movie) {
         compositeDisposable.add(
             useCase.foundLikedMovieByIdInDatabase(movie.id)
-                .subscribe { exist ->
-                    feedView.movieInDatabase(exist)
+                .subscribe { isExist ->
+                    feedView.movieInDatabase(isExist)
                 }
         )
     }
