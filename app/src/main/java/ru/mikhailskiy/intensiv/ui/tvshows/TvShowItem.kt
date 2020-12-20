@@ -4,11 +4,11 @@ import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import com.xwray.groupie.kotlinandroidextensions.Item
 import kotlinx.android.synthetic.main.item_tvshow.*
 import ru.mikhailskiy.intensiv.R
-import ru.mikhailskiy.intensiv.data.Movie
+import ru.mikhailskiy.intensiv.data.dto.MovieDTO
 
 class TvShowItem (
-    private val content: Movie,
-    private val onClick: (movie: Movie) -> Unit
+    private val content: MovieDTO,
+    private val onClick: (movie: MovieDTO) -> Unit
     ) : Item() {
 
         override fun getLayout() = R.layout.item_tvshow

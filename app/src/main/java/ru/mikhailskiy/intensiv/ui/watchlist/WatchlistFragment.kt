@@ -1,6 +1,5 @@
 package ru.mikhailskiy.intensiv.ui.watchlist
 
-import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -10,16 +9,25 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.fragment_watchlist.movies_recycler_view
-import ru.mikhailskiy.intensiv.MovieFinderApp
 import ru.mikhailskiy.intensiv.R
-import ru.mikhailskiy.intensiv.addSchedulers
-import ru.mikhailskiy.intensiv.data.Movie
-import ru.mikhailskiy.intensiv.database.MovieDao
+import ru.mikhailskiy.intensiv.data.repository.LikedMovieRepository
+import ru.mikhailskiy.intensiv.domain.usecase.LikedMovieUseCase
+import ru.mikhailskiy.intensiv.presentation.presenter.watchlist.WatchListPresenter
+import ru.mikhailskiy.intensiv.presentation.view.BaseView
+import ru.mikhailskiy.intensiv.presentation.view.watchlist.LikedMoviesView
+import timber.log.Timber
 
-class WatchlistFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private val database: MovieDao by lazy { MovieFinderApp.instance.database.likedFilmsDao }
-    private lateinit var moviesList: List<MoviePreviewItem>
+class WatchlistFragment : Fragment(), BaseView,LikedMoviesView {
+
+    private val watchListPresenter: WatchListPresenter by lazy {
+        WatchListPresenter(
+            LikedMovieUseCase(
+                LikedMovieRepository()
+            ),
+            this,
+            this
+        )
+    }
 
     private val adapter by lazy {
         GroupAdapter<GroupieViewHolder>()
@@ -39,43 +47,10 @@ class WatchlistFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        watchListPresenter.attachView(this)
+        watchListPresenter.getLikedMovies()
         movies_recycler_view.layoutManager = GridLayoutManager(context, 4)
         movies_recycler_view.adapter = adapter.apply { addAll(listOf()) }
-
-        val getAllLikedMoviesDisposable = database.getAllLikedMovies()
-            .addSchedulers()
-            .subscribe { it ->
-                moviesList =
-                    it.map { dto ->
-                        MoviePreviewItem(
-                            Movie(
-                                posterPath = dto.posterPath,
-                                adult = dto.adult,
-                                overview = dto.overview,
-                                releaseDate = dto.releaseDate,
-                                genreIds = null,
-                                id = dto.id,
-                                originalTitle = dto.originalTitle,
-                                originalLanguage = dto.originalLanguage,
-                                title = dto.title,
-                                backDropPath = dto.backDropPath,
-                                popularity = null,
-                                voteCount = dto.voteCount,
-                                video = dto.video,
-                                voteAverage = dto.voteAverage,
-                                liked = dto.liked
-                            )
-                        ) { movie -> }
-                    }.toList()
-                movies_recycler_view.adapter = adapter.apply { addAll(moviesList) }
-            }
-        /* MockRepository.getMovies().map {
-             MoviePreviewItem(
-                 it
-             ) { movie -> }
-         }.toList()*/
-
     }
 
     companion object {
@@ -84,5 +59,31 @@ class WatchlistFragment : Fragment() {
         fun newInstance() =
             WatchlistFragment().apply {
             }
+    }
+
+    override fun showLoading() {
+    }
+
+    override fun hideLoading() {
+    }
+
+    override fun showEmptyMovies() {
+    }
+
+    override fun showError(throwable: Throwable, errorText: String) {
+        Timber.e(throwable, errorText)
+    }
+
+    override fun showLikedMoviesFromDb(movies: List<MoviePreviewItem>) {
+        movies_recycler_view.adapter = adapter.apply { addAll(movies) }
+    }
+
+    override fun onStop() {
+        adapter.clear()
+        super.onStop()
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        watchListPresenter.detachView()
     }
 }

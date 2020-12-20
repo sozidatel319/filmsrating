@@ -1,10 +1,10 @@
-package ru.mikhailskiy.intensiv.data
+package ru.mikhailskiy.intensiv.data.dto
 
 import com.google.gson.annotations.SerializedName
 
-data class MoviesResponse(
+data class MoviesResponseDTO(
     var page: Int,
-    var results: List<Movie>,
+    var results: List<MovieDTO>,
     @SerializedName("total_results")
     var totalResults: Int,
     @SerializedName("total_pages")

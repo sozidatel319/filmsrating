@@ -4,14 +4,7 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <include layout="@layout/feed_header" />
-
-    <ProgressBar
-        android:id="@+id/feedProgressBar"
-        android:layout_width="@dimen/dimens_20"
-        android:layout_height="@dimen/dimens_20"
-        android:visibility="gone"
-        android:layout_gravity="center"
+    <include layout="@layout/feed_header"
         />
 
     <androidx.core.widget.NestedScrollView
@@ -25,6 +18,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
+            <include
+                layout="@layout/progressbar"
+                />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/movies_recycler_view"
