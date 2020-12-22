@@ -10,22 +10,18 @@ import android.widget.ToggleButton
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.movie_details_fragment.*
 import kotlinx.android.synthetic.main.toolbar.*
+import org.koin.android.ext.android.inject
+import org.koin.core.component.KoinApiExtension
 import ru.mikhailskiy.intensiv.Constants
 import ru.mikhailskiy.intensiv.R
-import ru.mikhailskiy.intensiv.data.repository.LikedMovieRepository
 import ru.mikhailskiy.intensiv.data.vo.Movie
-import ru.mikhailskiy.intensiv.domain.usecase.LikedMovieUseCase
 import ru.mikhailskiy.intensiv.presentation.presenter.moviedetails.MovieDetailsPresenter
 import ru.mikhailskiy.intensiv.presentation.view.movie_details.MovieDetailsView
 
+@KoinApiExtension
 class MovieDetailsFragment : Fragment(), MovieDetailsView {
 
-    private val movieDetailsPresenter: MovieDetailsPresenter by lazy {
-        MovieDetailsPresenter(
-            LikedMovieUseCase(LikedMovieRepository()),
-            this
-        )
-    }
+    private val movieDetailsPresenter: MovieDetailsPresenter by inject()
 
     private var idFilm: Long? = null
     private var titleFilm: String? = null

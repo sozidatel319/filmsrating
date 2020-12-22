@@ -2,8 +2,14 @@ package ru.mikhailskiy.intensiv
 
 import android.app.Application
 import androidx.room.Room
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
+import org.koin.core.logger.Level
 import ru.mikhailskiy.intensiv.Constants.DATABASE_NAME
 import ru.mikhailskiy.intensiv.database.AppDatabase
+import ru.mikhailskiy.intensiv.di.domainModule
+import ru.mikhailskiy.intensiv.di.presentationModule
 import timber.log.Timber
 
 class MovieFinderApp : Application() {
@@ -17,6 +23,12 @@ class MovieFinderApp : Application() {
             AppDatabase::class.java, DATABASE_NAME
         ).build()
         initDebugTools()
+
+        startKoin {
+            androidLogger(Level.DEBUG)
+            androidContext(this@MovieFinderApp)
+            modules(domainModule, presentationModule)
+        }
     }
 
     private fun initDebugTools() {
