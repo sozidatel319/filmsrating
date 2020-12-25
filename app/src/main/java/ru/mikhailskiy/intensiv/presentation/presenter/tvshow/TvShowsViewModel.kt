@@ -1,5 +1,6 @@
 package ru.mikhailskiy.intensiv.presentation.presenter.tvshow
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import io.reactivex.disposables.CompositeDisposable
@@ -8,7 +9,8 @@ import ru.mikhailskiy.intensiv.data.vo.Movie
 
 class TvShowsViewModel(private val repository: AllTvShowsRepository): ViewModel() {
 
-    val allTvShowsLiveData = MutableLiveData<List<Movie>>()
+    private val innerAllTvShowsLiveData = MutableLiveData<List<Movie>>()
+    val allTvShowsLiveData = innerAllTvShowsLiveData as LiveData<List<Movie>>
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -17,7 +19,7 @@ class TvShowsViewModel(private val repository: AllTvShowsRepository): ViewModel(
             repository.getPopularTvShows()
                 .subscribe(
                     {
-                    allTvShowsLiveData.postValue(it)
+                    innerAllTvShowsLiveData.postValue(it)
                     },
                     {
                     })

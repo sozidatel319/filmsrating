@@ -11,6 +11,6 @@ class AllTvShowsViewModelFactory(private val repository: AllTvShowsRepository) :
             if (modelClass.isAssignableFrom(TvShowsViewModel::class.java)) {
                 return TvShowsViewModel(repository) as T
             }
-            throw IllegalArgumentException("Unknown ViewModel class")
+            throw IllegalArgumentException("Unknown $modelClass class")
         }
     }
