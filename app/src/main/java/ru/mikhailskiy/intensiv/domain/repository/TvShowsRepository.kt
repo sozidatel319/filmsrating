@@ -5,5 +5,5 @@ import ru.mikhailskiy.intensiv.data.vo.Movie
 
 interface TvShowsRepository {
 
-    fun getPopularTvShows(): Single<List<Movie>>
+   suspend fun getPopularTvShows(): List<Movie>
 }
