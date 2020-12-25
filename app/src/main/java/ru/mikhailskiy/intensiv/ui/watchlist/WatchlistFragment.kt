@@ -9,25 +9,18 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.fragment_watchlist.movies_recycler_view
+import org.koin.android.ext.android.inject
+import org.koin.core.component.KoinApiExtension
 import ru.mikhailskiy.intensiv.R
-import ru.mikhailskiy.intensiv.data.repository.LikedMovieRepository
-import ru.mikhailskiy.intensiv.domain.usecase.LikedMovieUseCase
 import ru.mikhailskiy.intensiv.presentation.presenter.watchlist.WatchListPresenter
 import ru.mikhailskiy.intensiv.presentation.view.BaseView
 import ru.mikhailskiy.intensiv.presentation.view.watchlist.LikedMoviesView
 import timber.log.Timber
 
-class WatchlistFragment : Fragment(), BaseView,LikedMoviesView {
+@KoinApiExtension
+class WatchlistFragment : Fragment(), BaseView, LikedMoviesView {
 
-    private val watchListPresenter: WatchListPresenter by lazy {
-        WatchListPresenter(
-            LikedMovieUseCase(
-                LikedMovieRepository()
-            ),
-            this,
-            this
-        )
-    }
+    private val watchListPresenter: WatchListPresenter by inject()
 
     private val adapter by lazy {
         GroupAdapter<GroupieViewHolder>()
@@ -82,6 +75,7 @@ class WatchlistFragment : Fragment(), BaseView,LikedMoviesView {
         adapter.clear()
         super.onStop()
     }
+
     override fun onDestroy() {
         super.onDestroy()
         watchListPresenter.detachView()

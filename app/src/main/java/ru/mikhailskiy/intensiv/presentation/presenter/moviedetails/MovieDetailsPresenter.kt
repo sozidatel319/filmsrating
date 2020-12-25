@@ -1,14 +1,19 @@
 package ru.mikhailskiy.intensiv.presentation.presenter.moviedetails
 
 import io.reactivex.disposables.CompositeDisposable
+import org.koin.core.component.KoinApiExtension
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import ru.mikhailskiy.intensiv.data.mappers.MovieMapper.toMovieEntity
 import ru.mikhailskiy.intensiv.data.vo.Movie
 import ru.mikhailskiy.intensiv.domain.usecase.LikedMovieUseCase
 import ru.mikhailskiy.intensiv.presentation.base.BasePresenter
 import ru.mikhailskiy.intensiv.presentation.view.movie_details.MovieDetailsView
 
-class MovieDetailsPresenter(private val useCase: LikedMovieUseCase, private val movieDetailsView: MovieDetailsView) :
-    BasePresenter<MovieDetailsView>() {
+@KoinApiExtension
+class MovieDetailsPresenter :
+    BasePresenter<MovieDetailsView>(), KoinComponent {
+    private val useCase: LikedMovieUseCase by inject()
     private val compositeDisposable = CompositeDisposable()
 
     fun putLikedMovieToDataBase(movie: Movie) {
@@ -29,7 +34,7 @@ class MovieDetailsPresenter(private val useCase: LikedMovieUseCase, private val 
         compositeDisposable.add(
             useCase.foundLikedMovieByIdInDatabase(movie.id)
                 .subscribe { isExist ->
-                    movieDetailsView.movieInDatabase(isExist)
+                    view?.movieInDatabase(isExist)
                 }
         )
     }

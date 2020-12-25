@@ -17,7 +17,6 @@ class MoviePreviewItem(
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
         viewHolder.image_preview.setOnClickListener {
             onClick.invoke(content)
-            val s = content.fullBackDropPath
         }
         // TODO Получать из модели
 

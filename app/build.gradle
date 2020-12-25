@@ -97,4 +97,7 @@ dependencies {
     implementation "com.xwray:groupie-kotlin-android-extensions:$rootProject.groupieVersion"
 
     implementation "com.jakewharton.timber:timber:$rootProject.timberVersion"
+
+    //Koin
+    implementation "org.koin:koin-android:$rootProject.koin"
 }

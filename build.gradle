@@ -8,7 +8,7 @@ buildscript {
         
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0'
+        classpath 'com.android.tools.build:gradle:4.1.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -51,4 +51,5 @@ ext {
     rxJava2Version = '2.2.19'
     rxAndroidVersion = '2.1.1'
     roomVersion = "2.2.5"
+    koin = '2.2.2'
 }
