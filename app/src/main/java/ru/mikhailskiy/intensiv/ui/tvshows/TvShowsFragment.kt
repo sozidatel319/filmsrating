@@ -5,6 +5,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.progressbar.*
@@ -12,9 +14,9 @@ import kotlinx.android.synthetic.main.tv_shows_fragment.*
 import ru.mikhailskiy.intensiv.R
 import ru.mikhailskiy.intensiv.data.repository.AllTvShowsRepository
 import ru.mikhailskiy.intensiv.data.vo.Movie
-import ru.mikhailskiy.intensiv.domain.usecase.AllTvShowUseCase
 import ru.mikhailskiy.intensiv.openMovieDetails
-import ru.mikhailskiy.intensiv.presentation.presenter.tvshow.TvShowPresenter
+import ru.mikhailskiy.intensiv.presentation.base.AllTvShowsViewModelFactory
+import ru.mikhailskiy.intensiv.presentation.presenter.tvshow.TvShowsViewModel
 import ru.mikhailskiy.intensiv.presentation.view.BaseView
 import ru.mikhailskiy.intensiv.presentation.view.tvshow.PopularTvShowView
 import ru.mikhailskiy.intensiv.progressBarVisible
@@ -27,15 +29,7 @@ private const val ARG_PARAM2 = "param2"
 
 class TvShowsFragment : Fragment(), BaseView, PopularTvShowView {
 
-    private val tvShowPresenter: TvShowPresenter by lazy {
-        TvShowPresenter(
-            AllTvShowUseCase(
-                AllTvShowsRepository()
-            ),
-            this,
-            this
-        )
-    }
+    private lateinit var tvShowsViewModel: TvShowsViewModel
     private var param1: String? = null
     private var param2: String? = null
 
@@ -46,6 +40,15 @@ class TvShowsFragment : Fragment(), BaseView, PopularTvShowView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val allTvShowsViewModelFactory = AllTvShowsViewModelFactory(AllTvShowsRepository())
+
+        tvShowsViewModel =
+            ViewModelProvider(this, allTvShowsViewModelFactory).get(TvShowsViewModel::class.java)
+
+        tvShowsViewModel.getPopularTvShows()
+
+
         arguments?.let {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
@@ -63,10 +66,15 @@ class TvShowsFragment : Fragment(), BaseView, PopularTvShowView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        tvShowPresenter.attachView(this)
-        tvShowPresenter.getPopularTvShows()
 
         tvShowsRecyclerview.adapter = adapter.apply { addAll(listOf()) }
+
+        tvShowsViewModel.allTvShowsLiveData.observe(viewLifecycleOwner, Observer { list ->
+            val moviesList =
+                list.map {movie-> MovieItem(movie) { openMovieDetails(movie, R.id.movie_details_fragment) } }
+                    .toList()
+            tvShowsRecyclerview.adapter = adapter.apply { addAll(moviesList) }
+        })
 
     }
 
@@ -115,7 +123,6 @@ class TvShowsFragment : Fragment(), BaseView, PopularTvShowView {
     }
 
     override fun onDestroy() {
-        tvShowPresenter.detachView()
         super.onDestroy()
     }
 }
